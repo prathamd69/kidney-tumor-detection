@@ -4,6 +4,7 @@ stages:
     deps:
       - src/components/data_processing.py
       - config/config.yaml
+      - data/raw/images
       - data/raw/kidneyData.csv
     params:
       - data_processing.test_size

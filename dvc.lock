@@ -7,6 +7,11 @@ stages:
       hash: md5
       md5: 74c71b282f75586e451fccee6cd3b72b
       size: 171
+    - path: data/raw/images
+      hash: md5
+      md5: 9dc4cb1700ebd6d8c89682e682aff6a4.dir
+      size: 1661580918
+      nfiles: 12446
     - path: data/raw/kidneyData.csv
       hash: md5
       md5: f5c8e0c15deaaba15b96f88abe096473

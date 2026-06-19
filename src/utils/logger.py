@@ -15,7 +15,7 @@ def configLogger(loggerName: str, fileName: str) -> Logger:
         return logger
 
     logFormat = logging.Formatter(
-        "[ %(asctime)s ] %(lineno)d %(name)s - %(levelname)s - %(message)s"
+        "[ %(asctime)s ] %(name)s - %(levelname)s - %(message)s"
     )
 
     filePath = os.path.join(logDir, fileName)
