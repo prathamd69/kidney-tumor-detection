@@ -1,0 +1,13 @@
+stages:
+  data_processing:
+    cmd: python -m src.components.data_processing
+    deps:
+      - src/components/data_processing.py
+      - config/config.yaml
+      - data/raw/kidneyData.csv
+    params:
+      - data_processing.test_size
+      - data_processing.random_state
+    outs:
+      - data/final/train.csv
+      - data/final/test.csv

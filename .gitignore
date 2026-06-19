@@ -217,7 +217,13 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-#data
-data/
+
+# Ignore the data directory contents
+data/*
+
+# But DO NOT ignore the DVC pointer files inside it
+!data/**/.dvc
 
 .vscode/
+
+research/

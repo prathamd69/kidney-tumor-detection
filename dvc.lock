@@ -1,0 +1,30 @@
+schema: '2.0'
+stages:
+  data_processing:
+    cmd: python -m src.components.data_processing
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: 74c71b282f75586e451fccee6cd3b72b
+      size: 171
+    - path: data/raw/kidneyData.csv
+      hash: md5
+      md5: f5c8e0c15deaaba15b96f88abe096473
+      size: 1505319
+    - path: src/components/data_processing.py
+      hash: md5
+      md5: 3acced77e7f6a439363c8a9049ffe0aa
+      size: 1672
+    params:
+      params.yaml:
+        data_processing.random_state: 27
+        data_processing.test_size: 0.25
+    outs:
+    - path: data/final/test.csv
+      hash: md5
+      md5: b0950a3dcd0685bc28696213d846a9d1
+      size: 52171
+    - path: data/final/train.csv
+      hash: md5
+      md5: dd9418ccec235ec88f74e14477f41536
+      size: 156385

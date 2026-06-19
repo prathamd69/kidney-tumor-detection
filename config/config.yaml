@@ -1,0 +1,5 @@
+data_processing:
+  raw_data_path: data/raw/kidneyData.csv
+  train_data_path: data/final/train.csv
+  test_data_path: data/final/test.csv
+  log_path: data_processing.log
