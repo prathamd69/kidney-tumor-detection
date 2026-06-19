@@ -225,5 +225,3 @@ data/*
 !data/**/.dvc
 
 .vscode/
-
-research/
