@@ -220,8 +220,5 @@ __marimo__/
 
 # Ignore the data directory contents
 data/*
-research/
 
 .vscode/
-
-research/*
