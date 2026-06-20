@@ -14,3 +14,15 @@ stages:
     outs:
       - data/final/train.csv
       - data/final/test.csv
+
+  model_building:
+    cmd: python -m src.components.model_building
+    deps:
+      - src/components/model_building.py
+      - config/config.yaml
+    params:
+      - model_training.img_height
+      - model_training.img_width
+      - model_training.learning_rate
+    outs:
+      - models/base_model.keras

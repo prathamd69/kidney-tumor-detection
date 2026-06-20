@@ -5,8 +5,8 @@ stages:
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 74c71b282f75586e451fccee6cd3b72b
-      size: 171
+      md5: b28b8b29554c2581d60a11b4c1a204e4
+      size: 527
     - path: data/raw/images
       hash: md5
       md5: 9dc4cb1700ebd6d8c89682e682aff6a4.dir
@@ -18,18 +18,49 @@ stages:
       size: 1505319
     - path: src/components/data_processing.py
       hash: md5
-      md5: 3acced77e7f6a439363c8a9049ffe0aa
-      size: 1672
+      md5: 21cfe484118b0725b8abcdbacba62fc2
+      size: 1881
     params:
       params.yaml:
         data_processing.random_state: 27
+        data_processing.relation_map:
+          0: Cyst
+          1: Normal
+          2: Stone
+          3: Tumor
+        data_processing.target_mapping:
+          0: 0
+          1: 0
+          2: 0
+          3: 1
         data_processing.test_size: 0.25
     outs:
     - path: data/final/test.csv
       hash: md5
-      md5: b0950a3dcd0685bc28696213d846a9d1
-      size: 52171
+      md5: 6a5282f91b67cee614d105c9affc2630
+      size: 58407
     - path: data/final/train.csv
       hash: md5
-      md5: dd9418ccec235ec88f74e14477f41536
-      size: 156385
+      md5: 67f88fd532a1c47c242ab44963c5346b
+      size: 175065
+  model_building:
+    cmd: python -m src.components.model_building
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: b28b8b29554c2581d60a11b4c1a204e4
+      size: 527
+    - path: src/components/model_building.py
+      hash: md5
+      md5: 3a05e5d67730373243f8bdc9a3e16823
+      size: 1647
+    params:
+      params.yaml:
+        model_training.img_height: 224
+        model_training.img_width: 224
+        model_training.learning_rate: 0.001
+    outs:
+    - path: models/base_model.keras
+      hash: md5
+      md5: d58cb6f8375e77dffd67615fc0c81b80
+      size: 94943125
