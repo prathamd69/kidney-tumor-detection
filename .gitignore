@@ -221,7 +221,6 @@ __marimo__/
 # Ignore the data directory contents
 data/*
 
-# But DO NOT ignore the DVC pointer files inside it
-!data/**/.dvc
-
 .vscode/
+
+research/*

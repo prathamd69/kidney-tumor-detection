@@ -9,6 +9,8 @@ stages:
     params:
       - data_processing.test_size
       - data_processing.random_state
+      - data_processing.target_mapping
+      - data_processing.relation_map
     outs:
       - data/final/train.csv
       - data/final/test.csv

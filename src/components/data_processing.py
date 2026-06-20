@@ -5,10 +5,13 @@ from src.utils import configLogger, loadFile, saveFile, loadYaml
 
 logger = configLogger("data_processing", "data_processing.log")
 
-def processing(data: pd.DataFrame, test_size: float, random_state: int) -> tuple[pd.DataFrame, pd.DataFrame]:
+def processing(data: pd.DataFrame, test_size: float, random_state: int, raw_map : dict) -> tuple[pd.DataFrame, pd.DataFrame]:
     try:
         columns_to_drop = ['Unnamed: 0', 'path', 'diag', 'Class']
         data = data.drop(columns=columns_to_drop, errors='ignore')
+
+        target_map = {int(k): int(v) for k, v in raw_map.items()}
+        data['finaltarget'] = data['target'].map(target_map)
 
         train_data, test_data = train_test_split(
             data, 
@@ -34,9 +37,10 @@ def main():
     
     test_size = float(params.data_processing.test_size)
     random_state = int(params.data_processing.random_state)
+    raw_map = params.data_processing.target_mapping
 
     data = loadFile(raw_path)
-    train_data, test_data = processing(data, test_size, random_state)
+    train_data, test_data = processing(data, test_size, random_state, raw_map)
 
     saveFile(train_path, train_data)
     saveFile(test_path, test_data)
