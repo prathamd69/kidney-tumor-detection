@@ -58,9 +58,30 @@ stages:
       params.yaml:
         model_training.img_height: 224
         model_training.img_width: 224
-        model_training.learning_rate: 0.001
+        model_training.learning_rate: 0.005
     outs:
     - path: models/base_model.keras
       hash: md5
-      md5: d58cb6f8375e77dffd67615fc0c81b80
-      size: 94943125
+      md5: 46a780ac1a52a33f17cf4adf79a074f7
+      size: 94943124
+  model_training:
+    cmd: python -m src.components.model_training
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: b28b8b29554c2581d60a11b4c1a204e4
+      size: 527
+    - path: src/components/model_training.py
+      hash: md5
+      md5: f63213196530bd12bf5d783c470369c8
+      size: 3499
+    params:
+      params.yaml:
+        model_training.batch_size: 16
+        model_training.epochs: 5
+        model_training.learning_rate: 0.005
+    outs:
+    - path: models/trained_model.keras
+      hash: md5
+      md5: caa0316e55df07d0ca5d761d6b83580a
+      size: 94953954

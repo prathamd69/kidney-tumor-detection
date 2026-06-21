@@ -26,3 +26,15 @@ stages:
       - model_training.learning_rate
     outs:
       - models/base_model.keras
+
+  model_training:
+    cmd: python -m src.components.model_training
+    deps:
+      - src/components/model_training.py
+      - config/config.yaml
+    params:
+      - model_training.batch_size
+      - model_training.epochs
+      - model_training.learning_rate
+    outs:
+      - models/trained_model.keras

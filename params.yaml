@@ -16,5 +16,5 @@ model_training:
   batch_size: 16
   img_height: 224
   img_width: 224
-  epochs: 10
-  learning_rate: 0.001
+  epochs: 5
+  learning_rate: 0.005
