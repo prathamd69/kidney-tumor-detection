@@ -1,7 +1,7 @@
 from pathlib import Path
 import pandas as pd
 import tensorflow as tf
-import mlflow
+import mlflow, mlflow.keras
 from src.utils import configLogger, loadFile, loadYaml
 
 logger = configLogger("model_training", "model_training.log")
@@ -73,7 +73,7 @@ def main():
         trained_model_path.parent.mkdir(parents=True, exist_ok=True)
         model.save(str(trained_model_path))
 
-        mlflow.log_artifact(str(trained_model_path), artifact_path="models")
+        mlflow.keras.log_model(model=model, artifact_path="models") #type:ignore
         logger.info("Trained architecture safely exported to local storage: %s", trained_model_path)
 
 if __name__ == "__main__":

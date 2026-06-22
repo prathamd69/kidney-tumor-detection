@@ -92,6 +92,7 @@ def main():
         logger.info("Metrics successfully tracked to MLflow Experiment Dashboard.")
 
         metrics_payload = {
+            "run_name": run_name,
             "accuracy": acc,
             "precision": prec,
             "recall_sensitivity": rec,
@@ -108,8 +109,16 @@ def main():
         metrics_path = Path(config.reports.metrics_path)
         metrics_path.parent.mkdir(parents=True, exist_ok=True)
 
+        if metrics_path.exists():
+            with open(metrics_path, "r") as f:
+                metrics_history = json.load(f)
+        else:
+            metrics_history = []
+
+        metrics_history.append(metrics_payload)
+
         with open(metrics_path, "w") as f:
-            json.dump(metrics_payload, f, indent=4)
+            json.dump(metrics_history, f, indent=4)
             
         logger.info("Metrics dictionary successfully saved locally to %s", metrics_path)
 
