@@ -19,7 +19,7 @@ model_evaluation:
 
 experiment_tracking:
   experiment_name: CNNs
-  run_name: RESNET50V2_Evaluation_1
+  run_name: RESNET50V2_Evaluation_3
 
 reports:
   metrics_path: reports/metrics.json

@@ -44,5 +44,3 @@ stages:
     deps:
       - src/components/model_evaluation.py
       - config/config.yaml
-    outs:
-      - reports/metrics.json
