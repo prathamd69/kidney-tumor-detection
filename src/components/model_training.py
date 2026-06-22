@@ -49,10 +49,13 @@ def main():
     train_dataset = create_dataset(train_df, images_dir, batch_size, img_shape, is_training=True)
     
     # Configuring MLflow Tracking Experiments
-    mlflow.set_experiment("Kidney_Tumor_Detection")
+    experiment_name = str(config.experiment_tracking.experiment_name)
+    run_name = str(config.experiment_tracking.run_name)
+
+    mlflow.set_experiment(experiment_name=experiment_name)
     
     logger.info("Starting active MLflow tracking session...")
-    with mlflow.start_run():
+    with mlflow.start_run(run_name=run_name):
         params = dict(params.model_training)
         mlflow.log_params(params)
         mlflow.log_model_params

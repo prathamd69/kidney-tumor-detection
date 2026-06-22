@@ -16,3 +16,10 @@ model_evaluation:
   test_data_path: data/final/test.csv
   images_dir: data/raw/images
   trained_model_path: models/trained_model.keras
+
+experiment_tracking:
+  experiment_name: CNNs
+  run_name: RESNET50V2_Evaluation_1
+
+reports:
+  metrics_path: reports/metrics.json

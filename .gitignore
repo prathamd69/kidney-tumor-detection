@@ -225,3 +225,5 @@ data/*
 
 mlruns/
 mlflow.db
+
+reports/

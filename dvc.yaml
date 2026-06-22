@@ -38,3 +38,11 @@ stages:
       - model_training.learning_rate
     outs:
       - models/trained_model.keras
+
+  model_evaluation:
+    cmd: python -m src.components.model_evaluation
+    deps:
+      - src/components/model_evaluation.py
+      - config/config.yaml
+    outs:
+      - reports/metrics.json

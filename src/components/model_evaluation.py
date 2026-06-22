@@ -2,7 +2,15 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 import tensorflow as tf
-from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
+from sklearn.metrics import (confusion_matrix,
+                             roc_auc_score, 
+                             accuracy_score,
+                             precision_score,
+                             recall_score,
+                             f1_score)
+import mlflow
+import os
+import json
 from src.utils import configLogger, loadFile, loadYaml
 
 logger = configLogger("model_evaluation", "model_evaluation.log")
@@ -54,7 +62,58 @@ def main():
     y_pred = (y_probs > 0.5).astype(int)
     y_true = test_df['finaltarget'].astype('int32').to_numpy()
 
+
+    experiment_name = str(config.experiment_tracking.experiment_name)
+    run_name = str(config.experiment_tracking.run_name)
+    mlflow.set_experiment(experiment_name=experiment_name)
     
+    logger.info("Starting active MLflow evaluation tracking session...")
+    with mlflow.start_run(run_name=run_name):
+
+        acc = float(accuracy_score(y_true, y_pred))
+        prec = float(precision_score(y_true, y_pred))
+        rec = float(recall_score(y_true, y_pred))
+        f1 = float(f1_score(y_true, y_pred))
+        auc = float(roc_auc_score(y_true, y_probs))
+        
+        cm = confusion_matrix(y_true, y_pred)
+        tn, fp, fn, tp = map(int, cm.ravel())
+
+        mlflow.log_metric("eval_accuracy", acc)
+        mlflow.log_metric("eval_precision", prec)
+        mlflow.log_metric("eval_recall", rec)
+        mlflow.log_metric("eval_f1_score", f1)
+        mlflow.log_metric("eval_roc_auc", auc)
+        mlflow.log_metric("true_negatives", tn)
+        mlflow.log_metric("false_positives", fp)
+        mlflow.log_metric("false_negatives", fn)
+        mlflow.log_metric("true_positives", tp)
+        
+        logger.info("Metrics successfully tracked to MLflow Experiment Dashboard.")
+
+        metrics_payload = {
+            "accuracy": acc,
+            "precision": prec,
+            "recall_sensitivity": rec,
+            "f1_score": f1,
+            "roc_auc": auc,
+            "confusion_matrix": {
+                "true_normal_tn": tn,
+                "false_tumor_fp": fp,
+                "false_normal_fn": fn,
+                "true_tumor_tp": tp
+            }
+        }
+
+        metrics_path = Path(config.reports.metrics_path)
+        metrics_path.parent.mkdir(parents=True, exist_ok=True)
+
+        with open(metrics_path, "w") as f:
+            json.dump(metrics_payload, f, indent=4)
+            
+        logger.info("Metrics dictionary successfully saved locally to %s", metrics_path)
+
+        mlflow.log_artifact(str(metrics_path), artifact_path="evaluation_reports")
 
 if __name__ == "__main__":
     main()
