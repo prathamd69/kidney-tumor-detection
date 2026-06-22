@@ -29,3 +29,32 @@ def create_eval_dataset(df: pd.DataFrame, images_dir: Path, batch_size: int, img
                           num_parallel_calls=tf.data.AUTOTUNE)
     
     return dataset.batch(batch_size).prefetch(buffer_size=tf.data.AUTOTUNE)
+
+def main():
+    config = loadYaml(Path("config/config.yaml"))
+    params = loadYaml(Path("params.yaml"))
+
+    test_df = loadFile(Path(config.model_evaluation.test_data_path)) 
+    images_dir = Path(config.model_training.images_dir)
+    trained_model_path = Path(config.model_training.trained_model_path)
+    
+    img_shape = (int(params.model_training.img_height), int(params.model_training.img_width))
+    batch_size = int(params.model_training.batch_size)
+
+    logger.info("Building evaluation data streaming pipeline...")
+    eval_dataset = create_eval_dataset(test_df, images_dir, batch_size, img_shape)
+
+    logger.info("Loading trained model from %s", trained_model_path)
+    model = tf.keras.models.load_model(str(trained_model_path))
+
+    logger.info("Generating predictions over evaluation dataset...")
+    y_probs = model.predict(eval_dataset, verbose=1).flatten()
+    
+    # Convert sigmoid probabilities to binary 0 or 1 classes (threshold = 0.5)
+    y_pred = (y_probs > 0.5).astype(int)
+    y_true = test_df['finaltarget'].astype('int32').to_numpy()
+
+    
+
+if __name__ == "__main__":
+    main()
