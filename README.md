@@ -22,11 +22,12 @@ kidney-tumor-detection/
 ├── logs/                     # Component execution runtime logs
 ├── models/                   # Finalized serialized model artifacts (.h5/.keras)
 ├── reports/                  # Evaluation JSON scorecards
+├── data/
 ├── src/
 │   ├── components/
 │   │   ├── __init__.py
 │   │   ├── data_processing.py
-│   │   ├── data_building.py
+│   │   ├── model_building.py
 │   │   ├── model_training.py
 │   │   └── model_evaluation.py
 │   └── utils/
