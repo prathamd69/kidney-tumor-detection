@@ -30,10 +30,13 @@ kidney-tumor-detection/
 │   │   ├── model_building.py
 │   │   ├── model_training.py
 │   │   └── model_evaluation.py
-│   └── utils/
-│       ├── __init__.py
-│       └── logger.py         # Shared logger configs and YAML parsing utilities
-|       └── file_utils.py
+│   ├── utils/
+│   |    ├── __init__.py
+│   |    └── logger.py         # Shared logger configs and YAML parsing utilities
+|   |    └── file_utils.py
+|   └── prediction/
+|        ├── __init__.py
+|        └── prediction.py
 ├── params.yaml               # Model training hyperparameter configurations
 ├── dvc.yaml   
 ├── dvc.lock  
