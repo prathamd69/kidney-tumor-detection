@@ -230,3 +230,5 @@ reports/
 
 image.jpg
 test.py
+
+dmlenv.venv/

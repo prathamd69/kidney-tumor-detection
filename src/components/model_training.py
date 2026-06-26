@@ -44,7 +44,6 @@ def main():
 
     train_df = loadFile(Path(config.model_training.train_data_path))
     images_dir = Path(config.model_training.images_dir)
-    base_model_path = Path(config.model_training.base_model_path)
     trained_binaryclass_model_path = Path(config.model_training.trained_binaryclass_model_path)
     trained_multiclass_model_path = Path(config.model_training.trained_multiclass_model_path)
     is_binaryClassification = bool(params.model_training.is_binaryClassification)
@@ -89,12 +88,21 @@ def main():
             model.save(str(trained_binaryclass_model_path))
             mlflow.tensorflow.log_model(model=model, artifact_path="binaryclassmodels") # type:ignore
             logger.info("Binaryclass trained architecture safely exported to local storage: %s", trained_binaryclass_model_path)
+
+            if not trained_multiclass_model_path.exists():
+                trained_binaryclass_model_path.parent.mkdir(parents=True, exist_ok=True)
+                with open(trained_multiclass_model_path, "w") as f:
+                    f.write("placeholder")
         
         else:
             trained_multiclass_model_path.parent.mkdir(parents=True, exist_ok=True)
             model.save(str(trained_multiclass_model_path))
             mlflow.tensorflow.log_model(model=model, artifact_path="multiclassmodels")  # type:ignore
             logger.info("Multiclass trained architecture safely exported to local storage: %s", trained_multiclass_model_path)
-
+            
+            if not trained_multiclass_model_path.exists():
+                    trained_multiclass_model_path.parent.mkdir(parents=True, exist_ok=True)
+                    with open(trained_multiclass_model_path, "w") as f:
+                        f.write("placeholder")
 if __name__ == "__main__":
     main()

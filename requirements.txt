@@ -1,11 +1,17 @@
-numpy==2.4.6
-pandas==3.0.3
+# Fixed Hardware & Core Math Layer
+numpy>=1.23.5,<2
+tensorflow-cpu==2.10.0
+tensorflow-directml-plugin
+
+# Data & Machine Learning Frameworks
+pandas==2.0.3
+scikit-learn==1.3.2
 PyYAML==6.0.3
 dvc==3.67.1
-scikit-learn==1.9.0
 python-box==7.4.1
-tensorflow==2.21.0
 mlflow==3.14.0
+
+# API & Deployment Layer
 fastapi==0.138.0
 uvicorn==0.49.0
 pydantic==2.13.4

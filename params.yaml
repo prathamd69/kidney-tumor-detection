@@ -20,9 +20,9 @@ model_building:
   num_classes: 4
 
 model_training:
-  is_binaryClassification: True
+  is_binaryClassification: False
   batch_size: 16
   img_height: 224
   img_width: 224
-  epochs: 5
+  epochs: 1
   learning_rate: 0.005

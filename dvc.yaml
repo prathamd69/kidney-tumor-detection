@@ -25,7 +25,8 @@ stages:
       - model_training.img_width
       - model_training.learning_rate
     outs:
-      - models/base_model.keras
+      - models/binaryclass/base_binary_model.keras
+      - models/multiclass/base_multi_model.keras
 
   model_training:
     cmd: python -m src.components.model_training
@@ -37,7 +38,8 @@ stages:
       - model_training.epochs
       - model_training.learning_rate
     outs:
-      - models/trained_model.keras
+      - models/binaryclass/trained_binary_model.keras
+      - models/multiclass/trained_multiclass_model.keras
 
   model_evaluation:
     cmd: python -m src.components.model_evaluation

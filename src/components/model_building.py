@@ -80,7 +80,7 @@ def main():
         "RMSprop": tf.keras.optimizers.RMSprop
     }
 
-    opt_name = params.model_building.optimizer_name
+    opt_name = params.model_building.optimizer
     optimizer_class = OPTIMIZER_MAP.get(opt_name, tf.keras.optimizers.Adam)
 
     base_binaryclass_model_path = Path(config.model_building.base_binaryclass_model_path)

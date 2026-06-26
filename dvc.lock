@@ -5,8 +5,8 @@ stages:
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 3966bc6a48ff02a5cfc6fabc6e760242
-      size: 663
+      md5: 5c721562b650ed52b6fcefeca9065329
+      size: 1097
     - path: data/raw/images
       hash: md5
       md5: 9dc4cb1700ebd6d8c89682e682aff6a4.dir
@@ -18,8 +18,8 @@ stages:
       size: 1505319
     - path: src/components/data_processing.py
       hash: md5
-      md5: 21cfe484118b0725b8abcdbacba62fc2
-      size: 1881
+      md5: 103570a398c718f8d2ec348b7d61ee2d
+      size: 1882
     params:
       params.yaml:
         data_processing.random_state: 27
@@ -37,62 +37,70 @@ stages:
     outs:
     - path: data/final/test.csv
       hash: md5
-      md5: 6a5282f91b67cee614d105c9affc2630
-      size: 58407
+      md5: a8cc517fced25359669e5a4642db56a3
+      size: 58408
     - path: data/final/train.csv
       hash: md5
-      md5: 67f88fd532a1c47c242ab44963c5346b
-      size: 175065
+      md5: 79e451adaee3ccc362b92f4c555a9993
+      size: 175066
   model_building:
     cmd: python -m src.components.model_building
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 3966bc6a48ff02a5cfc6fabc6e760242
-      size: 663
+      md5: 5c721562b650ed52b6fcefeca9065329
+      size: 1097
     - path: src/components/model_building.py
       hash: md5
-      md5: 3a05e5d67730373243f8bdc9a3e16823
-      size: 1647
+      md5: 94528ca3364ececb3beb605a35cd9ee2
+      size: 3385
     params:
       params.yaml:
         model_training.img_height: 224
         model_training.img_width: 224
         model_training.learning_rate: 0.005
     outs:
-    - path: models/base_model.keras
+    - path: models/binaryclass/base_binary_model.keras
       hash: md5
-      md5: 3ecaa462c0ba5da011e5ffa584b7f7c2
-      size: 94943124
+      md5: b8937f9eee05bb435090556c15dc58d1
+      size: 94785960
+    - path: models/multiclass/base_multi_model.keras
+      hash: md5
+      md5: 5a0758480558bd2993e5f35b6efd901e
+      size: 94810560
   model_training:
     cmd: python -m src.components.model_training
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 3966bc6a48ff02a5cfc6fabc6e760242
-      size: 663
+      md5: 5c721562b650ed52b6fcefeca9065329
+      size: 1097
     - path: src/components/model_training.py
       hash: md5
-      md5: c779b4ab289d9d86983c4edbfc76d0df
-      size: 3369
+      md5: b9e2f9aea170f9c73d9aa619f3ee9710
+      size: 5028
     params:
       params.yaml:
         model_training.batch_size: 16
-        model_training.epochs: 5
+        model_training.epochs: 1
         model_training.learning_rate: 0.005
+    outs:
+    - path: models/binaryclass/trained_binary_model.keras
+      hash: md5
+      md5: d99d29dca9e274ffad71b7366d201846
+      size: 94808272
+    - path: models/multiclass/trained_multiclass_model.keras
+      hash: md5
+      md5: 6a99c575ab87f8c7d1ed1e52e7e349ce
+      size: 11
   model_evaluation:
     cmd: python -m src.components.model_evaluation
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 745bd40e2ccfbcf9bc957900e9e984a0
-      size: 663
+      md5: 5c721562b650ed52b6fcefeca9065329
+      size: 1097
     - path: src/components/model_evaluation.py
       hash: md5
-      md5: dbc3c628b6f8a3f040a6960b87e2ee4a
-      size: 5138
-    outs:
-    - path: reports/metrics.json
-      hash: md5
-      md5: cfb57f8d0e84094c6db124b9a48852de
-      size: 463
+      md5: 74f3c989845b4532444dd3aff3adee12
+      size: 7899
