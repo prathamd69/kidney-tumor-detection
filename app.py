@@ -1,6 +1,8 @@
 import uvicorn
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from contextlib import asynccontextmanager
+from fastapi.responses import HTMLResponse
+from pathlib import Path
 from src.utils import configLogger
 from src.prediction import Predictor
 
@@ -26,10 +28,15 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-@app.get("/")
-async def home() -> dict:
-    logger.info("hello from uvicorn")
-    return {'message' : 'hellow from uvicorn'}
+@app.get("/", response_class=HTMLResponse)
+async def home():
+    logger.info("Serving user-interface dashboard templates index.")
+    try:
+        template_path = Path("templates/index.html")
+        return HTMLResponse(content=template_path.read_text(), status_code=200)
+    except Exception as e:
+        logger.error("Failed to render frontend template: %s", e)
+        raise HTTPException(status_code=500, detail="User interface template missing on server.")
 
 @app.post("/predict", tags=["Inference Engine"])
 async def predict_ct_scan(request: Request, file: UploadFile = File(...)):
