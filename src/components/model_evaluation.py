@@ -49,41 +49,46 @@ def main():
 
     test_df = loadFile(Path(config.model_evaluation.test_data_path)) 
     images_dir = Path(config.model_training.images_dir)
-    trained_model_path = Path(config.model_training.trained_model_path)
+    trained_binaryclass_model_path = Path(config.model_training.trained_binaryclass_model_path)
+    trained_multiclass_model_path = Path(config.model_training.trained_multiclass_model_path)
     
     img_shape = (int(params.model_training.img_height), int(params.model_training.img_width))
     batch_size = int(params.model_training.batch_size)
     is_binaryClassification = bool(params.model_training.is_binaryClassification)
 
-    logger.info("Building evaluation data streaming pipeline...")
-    eval_dataset = create_eval_dataset(test_df, images_dir, batch_size, img_shape, is_binaryClassification)
-
-    logger.info("Loading trained model from %s", trained_model_path)
-    model = tf.keras.models.load_model(str(trained_model_path))
-
-    logger.info("Generating predictions over evaluation dataset...")
-    y_probs = model.predict(eval_dataset, verbose=1).flatten()
-    
-    # Convert sigmoid probabilities to binary 0 or 1 classes (threshold = 0.5)
-    y_pred = (y_probs > 0.5).astype(int)
-    y_true = test_df['finaltarget'].astype('int32').to_numpy()
-
-
     experiment_name = str(config.experiment_tracking.experiment_name)
     run_name = str(config.experiment_tracking.run_name)
     mlflow.set_experiment(experiment_name=experiment_name)
-    
-    logger.info("Starting active MLflow evaluation tracking session...")
-    with mlflow.start_run(run_name=run_name):
 
-        acc = float(accuracy_score(y_true, y_pred))
-        prec = float(precision_score(y_true, y_pred))
-        rec = float(recall_score(y_true, y_pred))
-        f1 = float(f1_score(y_true, y_pred))
-        auc = float(roc_auc_score(y_true, y_probs))
-        
-        cm = confusion_matrix(y_true, y_pred)
-        tn, fp, fn, tp = map(int, cm.ravel())
+    metrics_path = Path(config.reports.metrics_path)
+    metrics_path.parent.mkdir(parents=True, exist_ok=True)
+
+    logger.info("Building evaluation data streaming pipeline...")
+    eval_dataset = create_eval_dataset(test_df, images_dir, batch_size, img_shape, is_binaryClassification)
+
+    if is_binaryClassification:        
+
+        logger.info("Loading trained model from %s", trained_binaryclass_model_path)
+        model = tf.keras.models.load_model(str(trained_binaryclass_model_path))
+
+        logger.info("Generating predictions over evaluation dataset...")
+        y_probs = model.predict(eval_dataset, verbose=1).flatten()
+    
+        # Convert sigmoid probabilities to binary 0 or 1 classes (threshold = 0.5)
+        y_pred = (y_probs > 0.5).astype(int)
+        y_true = test_df['binarytarget'].astype('int32').to_numpy()
+    
+        logger.info("Starting active MLflow evaluation tracking session...")
+        with mlflow.start_run(run_name=run_name):
+
+            acc = float(accuracy_score(y_true, y_pred))
+            prec = float(precision_score(y_true, y_pred))
+            rec = float(recall_score(y_true, y_pred))
+            f1 = float(f1_score(y_true, y_pred))
+            auc = float(roc_auc_score(y_true, y_probs))
+            
+            cm = confusion_matrix(y_true, y_pred)
+            tn, fp, fn, tp = map(int, cm.ravel())
 
         mlflow.log_metric("eval_accuracy", acc)
         mlflow.log_metric("eval_precision", prec)
@@ -112,8 +117,62 @@ def main():
             }
         }
 
-        metrics_path = Path(config.reports.metrics_path)
-        metrics_path.parent.mkdir(parents=True, exist_ok=True)
+        if metrics_path.exists():
+            with open(metrics_path, "r") as f:
+                metrics_history = json.load(f)
+        else:
+            metrics_history = []
+
+        metrics_history.append(metrics_payload)
+
+        with open(metrics_path, "w") as f:
+            json.dump(metrics_history, f, indent=4)
+            
+        logger.info("Metrics dictionary successfully saved locally to %s", metrics_path)
+        mlflow.log_artifact(str(metrics_path), artifact_path="binary_evaluation_reports")
+
+    else:
+
+        logger.info("Loading trained model from %s", trained_multiclass_model_path)
+        model = tf.keras.models.load_model(str(trained_multiclass_model_path))
+
+        logger.info("Generating predictions over evaluation dataset...")
+        y_probs = model.predict(eval_dataset, verbose=1)
+
+        # Using np.argmax to extract classes from softmax values
+        y_pred = np.argmax(y_probs, axis=1)
+        y_true = test_df['target'].astype('int32').to_numpy()
+
+        logger.info("Starting active MLflow evaluation tracking session...")
+        with mlflow.start_run(run_name=run_name):
+
+            acc = float(accuracy_score(y_true, y_pred))
+            prec = float(precision_score(y_true, y_pred, average='macro'))
+            rec = float(recall_score(y_true, y_pred, average='macro'))
+            f1 = float(f1_score(y_true, y_pred, average='macro'))
+            auc = float(roc_auc_score(y_true, y_probs, multi_class='ovr', average='macro'))
+            
+            cm = confusion_matrix(y_true, y_pred)
+            cm_payload = cm.tolist()
+            
+
+        mlflow.log_metric("eval_accuracy", acc)
+        mlflow.log_metric("eval_precision", prec)
+        mlflow.log_metric("eval_recall", rec)
+        mlflow.log_metric("eval_f1_score", f1)
+        mlflow.log_metric("eval_roc_auc", auc)
+        
+        logger.info("Metrics successfully tracked to MLflow Experiment Dashboard.")
+
+        metrics_payload = {
+            "run_name": run_name,
+            "accuracy": acc,
+            "precision": prec,
+            "recall_sensitivity": rec,
+            "f1_score": f1,
+            "roc_auc": auc,
+            "confusion_matrix": cm_payload
+        }
 
         if metrics_path.exists():
             with open(metrics_path, "r") as f:
@@ -127,8 +186,7 @@ def main():
             json.dump(metrics_history, f, indent=4)
             
         logger.info("Metrics dictionary successfully saved locally to %s", metrics_path)
-
-        mlflow.log_artifact(str(metrics_path), artifact_path="evaluation_reports")
+        mlflow.log_artifact(str(metrics_path), artifact_path="multi_evaluation_reports")
 
 if __name__ == "__main__":
     main()

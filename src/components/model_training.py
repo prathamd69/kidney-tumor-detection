@@ -2,7 +2,6 @@ from pathlib import Path
 import pandas as pd
 import tensorflow as tf
 import mlflow
-from box import ConfigBox
 from src.utils import configLogger, loadFile, loadYaml
 
 logger = configLogger("model_training", "model_training.log")
