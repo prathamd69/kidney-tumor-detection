@@ -10,12 +10,14 @@ model_training:
   train_data_path: data/final/train.csv
   images_dir: data/raw/images
   base_model_path: models/base_model.keras
-  trained_model_path: models/trained_model.keras
+  trained_binaryclass_model_path: models/trained_binaryclass_model.keras
+  trained_multiclass_model_path: models/trained_multiclass_model.keras
 
 model_evaluation:
   test_data_path: data/final/test.csv
   images_dir: data/raw/images
-  trained_model_path: models/trained_model.keras
+  trained_binaryclass_model_path: models/trained_binaryclass_model.keras
+  trained_multiclass_model_path: models/trained_multiclass_model.keras
 
 experiment_tracking:
   experiment_name: CNNs
