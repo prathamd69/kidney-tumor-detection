@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kidney Tumor Detection Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between">
+
+    <header class="border-b border-slate-800 bg-slate-950/50 backdrop-blur p-4">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-tight text-emerald-400">NephroScan <span class="text-slate-400 font-normal">AI</span></h1>
+            <span class="text-xs bg-slate-800 text-slate-400 px-2.5 py-1 rounded-full font-mono">v0.0.1</span>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-2xl w-full mx-auto p-4 flex flex-col justify-center">
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-6">
+            
+            <div class="text-center space-y-2">
+                <h2 class="text-2xl font-bold">Kidney Tumor Diagnostic Screening</h2>
+                <p class="text-sm text-slate-400">Upload a processed abdominal CT scan slice (PNG/JPG) for immediate diagnostic prediction analytics.</p>
+            </div>
+
+            <div id="drop-zone" class="border-2 border-dashed border-slate-700 hover:border-emerald-500/50 rounded-xl p-8 text-center cursor-pointer transition bg-slate-900/30 group">
+                <input type="file" id="file-input" class="hidden" accept=".png,.jpg,.jpeg">
+                <div class="space-y-3" id="upload-prompt">
+                    <div class="text-4xl text-slate-500 group-hover:text-emerald-400 transition">📸</div>
+                    <p class="text-sm font-medium">Click to upload or drag and drop image file</p>
+                    <p class="text-xs text-slate-500">Supports JPEG, JPG, and PNG files</p>
+                </div>
+                <img id="image-preview" class="hidden max-h-64 mx-auto rounded-lg border border-slate-700 shadow-md">
+            </div>
+
+            <button id="analyze-btn" disabled class="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-600 text-white font-semibold py-3 px-4 rounded-xl transition shadow-lg shadow-emerald-900/20 disabled:shadow-none flex justify-center items-center space-x-2">
+                <span>Analyze Scan Architecture</span>
+            </button>
+
+            <div id="results-card" class="hidden border rounded-xl p-5 bg-slate-900/50 space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium text-slate-400">Diagnostic Verdict:</span>
+                    <span id="verdict-badge" class="px-3 py-1 text-xs font-bold uppercase rounded-md"></span>
+                </div>
+                <div class="space-y-1.5">
+                    <div class="flex justify-between text-xs text-slate-400">
+                        <span>Prediction Certainty Profile:</span>
+                        <span id="confidence-text" class="font-mono font-bold">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2">
+                        <div id="confidence-bar" class="h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="text-center p-4 text-xs text-slate-600 font-mono">
+        In-Memory Deployment Architecture Base
+    </footer>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const dropZone = document.getElementById('drop-zone');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const uploadPrompt = document.getElementById('upload-prompt');
+        const imagePreview = document.getElementById('image-preview');
+        const resultsCard = document.getElementById('results-card');
+        const verdictBadge = document.getElementById('verdict-badge');
+        const confidenceText = document.getElementById('confidence-text');
+        const confidenceBar = document.getElementById('confidence-bar');
+
+        let selectedFile = null;
+
+        // Route clicks into hidden file input fields
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', (e) => {
+            if(e.target.files.length) handleFileSelection(e.target.files[0]);
+        });
+
+        // Simple Drag and Drop Event Listeners
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-emerald-500'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-emerald-500'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-emerald-500');
+            if(e.dataTransfer.files.length) handleFileSelection(e.dataTransfer.files[0]);
+        });
+
+        function handleFileSelection(file) {
+            selectedFile = file;
+            analyzeBtn.disabled = false;
+            resultsCard.classList.add('hidden');
+            
+            // Handle instant frontend thumbnail previewing
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                imagePreview.classList.remove('hidden');
+                uploadPrompt.classList.add('hidden');
+            }
+            reader.readAsDataURL(file);
+        }
+
+        analyzeBtn.addEventListener('click', async () => {
+            if(!selectedFile) return;
+
+            // Update UI state to Processing Loader
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerText = "Processing Matrix Signatures...";
+            resultsCard.classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append("file", selectedFile);
+
+            try {
+                // Post image array bytes to your backend FastAPI server route
+                const response = await fetch('/predict', { method: 'POST', body: formData });
+                const data = await response.json();
+
+                if(!response.ok) throw new Error(data.detail || "Inference Engine Exception.");
+
+                // Map analytics to output elements
+                const percent = (data.confidence * 100).toFixed(1) + '%';
+                confidenceText.innerText = percent;
+                confidenceBar.style.width = percent;
+
+                verdictBadge.innerText = data.prediction;
+                if(data.prediction === "Tumor") {
+                    verdictBadge.className = "px-3 py-1 text-xs font-bold uppercase rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20";
+                    confidenceBar.className = "h-2 rounded-full transition-all duration-500 bg-rose-500";
+                } else {
+                    verdictBadge.className = "px-3 py-1 text-xs font-bold uppercase rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                    confidenceBar.className = "h-2 rounded-full transition-all duration-500 bg-emerald-500";
+                }
+
+                resultsCard.classList.remove('hidden');
+
+            } catch (err) {
+                alert(`Error: ${err.message}`);
+            } finally {
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerText = "Analyze Scan Architecture";
+            }
+        });
+    </script>
+</body>
+</html>
