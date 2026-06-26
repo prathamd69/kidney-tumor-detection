@@ -10,16 +10,20 @@ logger = configLogger("app","app.log")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-
-    # [STARTUP LOGIC]: Instantiates and caches the model component
-    logger.info("Initializing application lifecycle.")
-    pipeline_instance = Predictor()
+    try:
+        # [STARTUP LOGIC]: Instantiates and caches the model component
+        logger.info("Initializing application lifecycle.")
+        pipeline_instance = Predictor()
+        
+        # Expose the pipeline resource to the app endpoints via state dictionary context
+        yield {"pipeline": pipeline_instance}
+        
+        # [SHUTDOWN LOGIC]: Executes when the server process terminates
+        logger.info("Tearing down application infrastructure context.")
     
-    # Expose the pipeline resource to the app endpoints via state dictionary context
-    yield {"pipeline": pipeline_instance}
-    
-    # [SHUTDOWN LOGIC]: Executes when the server process terminates
-    logger.info("Tearing down application infrastructure context.")
+    except Exception as e:
+        logger.exception("Error while creating lifespan : %s", e)
+        raise
 
 app = FastAPI(
     title="Kidney Tumor Detection API",
@@ -60,8 +64,12 @@ async def predict_ct_scan(request: Request, file: UploadFile = File(...)):
             
         return result
         
+    except HTTPException as e:
+        logger.exception("HTTP exception : %s", e)
+        raise
+
     except Exception as e:
-        logger.exception("Exception : %s", e)
+        logger.exception("Internal application error: %s", e)
         raise HTTPException(status_code=500, detail=f"Internal Server Failure: {str(e)}")
 
 if __name__ == "__main__":
