@@ -4,7 +4,8 @@ data_processing:
   test_data_path: data/final/test.csv
 
 model_building:
-  base_model_path: models/base_model.keras
+  base_binaryclass_model_path: models/base_binaryclass_model.keras
+  base_multiclass_model_path: models/base_multiclass_model.keras
 
 model_training:
   train_data_path: data/final/train.csv

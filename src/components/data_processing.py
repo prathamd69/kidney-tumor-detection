@@ -11,7 +11,7 @@ def processing(data: pd.DataFrame, test_size: float, random_state: int, raw_map 
         data = data.drop(columns=columns_to_drop, errors='ignore')
 
         target_map = {int(k): int(v) for k, v in raw_map.items()}
-        data['finaltarget'] = data['target'].map(target_map)
+        data['binarytarget'] = data['target'].map(target_map)
 
         train_data, test_data = train_test_split(
             data, 

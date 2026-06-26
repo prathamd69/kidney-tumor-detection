@@ -25,10 +25,15 @@ def parse_image(file_path: str, label: int, img_shape: tuple) -> tuple:
         logger.error("Failed to parse image file at %s: %s", file_path, e)
         raise
 
-def create_eval_dataset(df: pd.DataFrame, images_dir: Path, batch_size: int, img_shape: tuple) -> tf.data.Dataset:
+def create_eval_dataset(df: pd.DataFrame, images_dir: Path, batch_size: int, img_shape: tuple, is_binaryClassification : bool) -> tf.data.Dataset:
     """Assembles a streaming evaluation pipeline (NO shuffling needed for evaluation)."""
     file_paths = df['image_id'].apply(lambda x: str(images_dir / f"{x}.jpg")).astype(str).to_numpy()
-    labels = df['finaltarget'].astype('int32').to_numpy()
+    
+    if is_binaryClassification:
+        labels = df['binarytarget'].astype('int32').to_numpy()
+    
+    else:
+        labels = df['target'].astype('int32').to_numpy()
     
     dataset = tf.data.Dataset.from_tensor_slices((tf.constant(file_paths, dtype=tf.string), 
                                                   tf.constant(labels, dtype=tf.int32)))
@@ -48,9 +53,10 @@ def main():
     
     img_shape = (int(params.model_training.img_height), int(params.model_training.img_width))
     batch_size = int(params.model_training.batch_size)
+    is_binaryClassification = bool(params.model_training.is_binaryClassification)
 
     logger.info("Building evaluation data streaming pipeline...")
-    eval_dataset = create_eval_dataset(test_df, images_dir, batch_size, img_shape)
+    eval_dataset = create_eval_dataset(test_df, images_dir, batch_size, img_shape, is_binaryClassification)
 
     logger.info("Loading trained model from %s", trained_model_path)
     model = tf.keras.models.load_model(str(trained_model_path))

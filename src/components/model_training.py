@@ -1,7 +1,7 @@
 from pathlib import Path
 import pandas as pd
 import tensorflow as tf
-import mlflow, mlflow.keras
+import mlflow
 from box import ConfigBox
 from src.utils import configLogger, loadFile, loadYaml
 
@@ -50,6 +50,14 @@ def main():
     trained_multiclass_model_path = Path(config.model_training.trained_multiclass_model_path)
     is_binaryClassification = bool(params.model_training.is_binaryClassification)
 
+    if is_binaryClassification:
+        base_model_path = Path(config.model_training.base_binaryclass_model_path)
+    else:
+        base_model_path = Path(config.model_training.base_multiclass_model_path)
+
+    trained_binaryclass_model_path = Path(config.model_training.trained_binaryclass_model_path)
+    trained_multiclass_model_path = Path(config.model_training.trained_multiclass_model_path)
+
     img_shape = (int(params.model_training.img_height), int(params.model_training.img_width))
     batch_size = int(params.model_training.batch_size)
     epochs = int(params.model_training.epochs)
@@ -64,9 +72,8 @@ def main():
     
     logger.info("Starting active MLflow tracking session...")
     with mlflow.start_run(run_name=run_name):
-        params = dict(params.model_training)
-        mlflow.log_params(params)
-        mlflow.log_model_params
+        params_dict = dict(params.model_training)
+        mlflow.log_params(params_dict)
 
         logger.info("Loading un-trained compiled model structure from %s", base_model_path)
         model = tf.keras.models.load_model(str(base_model_path))
@@ -81,15 +88,13 @@ def main():
         if is_binaryClassification:
             trained_binaryclass_model_path.parent.mkdir(parents=True, exist_ok=True)
             model.save(str(trained_binaryclass_model_path))
-
-            mlflow.keras.log_model(model=model, artifact_path="binaryclassmodels") #type:ignore
+            mlflow.tensorflow.log_model(model=model, artifact_path="binaryclassmodels") # type:ignore
             logger.info("Binaryclass trained architecture safely exported to local storage: %s", trained_binaryclass_model_path)
-
+        
         else:
             trained_multiclass_model_path.parent.mkdir(parents=True, exist_ok=True)
             model.save(str(trained_multiclass_model_path))
-
-            mlflow.keras.log_model(model=model, artifact_path="multiclassmodels") #type:ignore
+            mlflow.tensorflow.log_model(model=model, artifact_path="multiclassmodels")  # type:ignore
             logger.info("Multiclass trained architecture safely exported to local storage: %s", trained_multiclass_model_path)
 
 if __name__ == "__main__":

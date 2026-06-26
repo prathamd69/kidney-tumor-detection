@@ -7,17 +7,62 @@ from src.utils import configLogger, loadYaml
 
 logger = configLogger("model_building", "model_building.log")
 
-def build_model(img_shape: tuple) -> Model:
-    base_model = ResNet50V2(weights='imagenet', 
-                            include_top=False, 
-                            input_shape=(img_shape[0], img_shape[1], 3))
+def build_binary_model(
+    img_shape: tuple, 
+    lr: float, 
+    loss: str, 
+    metrics: list, 
+    optimizer_cls: type[tf.keras.optimizers.Optimizer]) -> Model:
+    
+    base_model = ResNet50V2(
+        weights='imagenet', 
+        include_top=False, 
+        input_shape=(img_shape[0], img_shape[1], 3)
+    )
     base_model.trainable = False  
     
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
     output_layer = Dense(1, activation='sigmoid')(x)
+
+    model = Model(inputs=base_model.input, outputs=output_layer)
+
+    model.compile(
+        optimizer=optimizer_cls(learning_rate=lr),
+        loss=loss,
+        metrics=metrics
+    )
     
-    return Model(inputs=base_model.input, outputs=output_layer)
+    return model
+
+def build_multi_model(
+    img_shape: tuple, 
+    lr: float, 
+    loss: str, 
+    metrics: list, 
+    optimizer_cls: type[tf.keras.optimizers.Optimizer],
+    num_classes: int = 4) -> Model:
+
+    base_model = ResNet50V2(
+        weights='imagenet', 
+        include_top=False, 
+        input_shape=(img_shape[0], img_shape[1], 3)
+    )
+    base_model.trainable = False  
+    
+    x = base_model.output
+    x = GlobalAveragePooling2D()(x)
+    output_layer = Dense(num_classes, activation='softmax')(x)
+
+    model = Model(inputs=base_model.input, outputs=output_layer)
+
+    model.compile(
+        optimizer=optimizer_cls(learning_rate=lr),
+        loss=loss,
+        metrics=metrics
+    )
+    
+    return model
 
 def main():
     config = loadYaml(Path("config/config.yaml"))
@@ -25,20 +70,31 @@ def main():
 
     img_shape = (int(params.model_training.img_height), int(params.model_training.img_width))
     lr = float(params.model_training.learning_rate)
-    base_model_path = Path(config.model_building.base_model_path)
+    binaryloss = str(params.model_building.binary_loss)
+    multiloss = str(params.model_building.multi_loss)
+    metrics = list(params.model_building.metrics)
+
+    OPTIMIZER_MAP= {
+        "Adam": tf.keras.optimizers.Adam,
+        "SGD": tf.keras.optimizers.SGD,
+        "RMSprop": tf.keras.optimizers.RMSprop
+    }
+
+    opt_name = params.model_building.optimizer_name
+    optimizer_class = OPTIMIZER_MAP.get(opt_name, tf.keras.optimizers.Adam)
+
+    base_binaryclass_model_path = Path(config.model_building.base_binaryclass_model_path)
+    base_multiclass_model_path = Path(config.model_building.base_multiclass_model_path)
     
     logger.info("Building compiled ResNet50V2 baseline model architecture")
-    model = build_model(img_shape)
+    binarymodel = build_binary_model(img_shape, lr, binaryloss, metrics, optimizer_class)
+    multimodel = build_multi_model(img_shape, lr, multiloss, metrics, optimizer_class)
     
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=lr),
-        loss='binary_crossentropy',
-        metrics=['accuracy']
-    )
-    
-    base_model_path.parent.mkdir(parents=True, exist_ok=True)
-    model.save(str(base_model_path))
-    logger.info("Base untargeted model saved at: %s", base_model_path)
+    base_binaryclass_model_path.parent.mkdir(parents=True, exist_ok=True)
+    binarymodel.save(str(base_binaryclass_model_path))
+    multimodel.save(str(base_multiclass_model_path))
+    logger.info("Base binary untargeted model saved at: %s", base_binaryclass_model_path)
+    logger.info("Base multiclass untargeted model saved at: %s", base_multiclass_model_path)
 
 if __name__ == "__main__":
     main()
