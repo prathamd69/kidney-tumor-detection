@@ -24,15 +24,15 @@ def main():
     images_dir = Path(config.data_paths.images_dir)
     trained_multiclass_model_path = Path(config.model_paths.trained_multiclass_model_path)
 
-    img_shape = (int(params.model_training.img_height), int(params.model_training.img_width))
-    batch_size = int(params.model_training.batch_size)
-    is_binaryClassification = bool(params.model_training.is_binaryClassification)
+    img_shape = (int(params.model_building.img_height), int(params.model_building.img_width))
+    batch_size = int(params.multiclass_model_training.batch_size)
+    is_binaryClassification = bool(params.multiclass_model_training.is_binaryClassification)
 
     experiment_name = str(config.experiment_paths.multiclass_experiment_name)
     run_name = str(config.experiment_paths.multiclass_run_name)
     mlflow.set_experiment(experiment_name=experiment_name)
 
-    metrics_path = Path(config.reports.metrics_path)
+    metrics_path = Path(config.report_paths.multimodel_metrics_path)
     metrics_path.parent.mkdir(parents=True, exist_ok=True)
 
     logger.info("Building evaluation data streaming pipeline...")

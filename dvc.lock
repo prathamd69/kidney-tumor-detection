@@ -5,8 +5,8 @@ stages:
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 5c721562b650ed52b6fcefeca9065329
-      size: 1097
+      md5: 2fd0ed2d8df075b2ba2cc89326c0252d
+      size: 839
     - path: data/raw/images
       hash: md5
       md5: 9dc4cb1700ebd6d8c89682e682aff6a4.dir
@@ -18,8 +18,8 @@ stages:
       size: 1505319
     - path: src/components/data_processing.py
       hash: md5
-      md5: 103570a398c718f8d2ec348b7d61ee2d
-      size: 1882
+      md5: 5623841dd675c48e8321516a5cbf7c55
+      size: 1867
     params:
       params.yaml:
         data_processing.random_state: 27
@@ -48,25 +48,32 @@ stages:
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 5c721562b650ed52b6fcefeca9065329
-      size: 1097
+      md5: 2fd0ed2d8df075b2ba2cc89326c0252d
+      size: 839
     - path: src/components/model_building.py
       hash: md5
-      md5: 94528ca3364ececb3beb605a35cd9ee2
-      size: 3385
+      md5: 317ad57dfd9760c32f77f91cd756894c
+      size: 3487
     params:
       params.yaml:
-        model_training.img_height: 224
-        model_training.img_width: 224
-        model_training.learning_rate: 0.005
+        binaryclass_model_training.learning_rate: 0.01
+        model_building.binary_loss: binary_crossentropy
+        model_building.img_height: 224
+        model_building.img_width: 224
+        model_building.metrics:
+        - accuracy
+        model_building.multi_loss: sparse_categorical_crossentropy
+        model_building.num_classes: 4
+        model_building.optimizer: Adam
+        multiclass_model_training.learning_rate: 0.01
     outs:
     - path: models/binaryclass/base_binary_model.keras
       hash: md5
-      md5: b8937f9eee05bb435090556c15dc58d1
+      md5: df721eb1282ec88169f60d4c10783f98
       size: 94785960
     - path: models/multiclass/base_multi_model.keras
       hash: md5
-      md5: 5a0758480558bd2993e5f35b6efd901e
+      md5: dcbc604138cb1bc32b8b1ff821553180
       size: 94810560
   model_training:
     cmd: python -m src.components.model_training
@@ -104,3 +111,67 @@ stages:
       hash: md5
       md5: 74f3c989845b4532444dd3aff3adee12
       size: 7899
+  binaryclass_training:
+    cmd: python -m src.components.binaryclassification.binaryclass_training
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: 2fd0ed2d8df075b2ba2cc89326c0252d
+      size: 839
+    - path: src/components/binaryclassification/binaryclass_training.py
+      hash: md5
+      md5: dca9a30424c1d92aa1a62fca87b649e6
+      size: 2415
+    params:
+      params.yaml:
+        binaryclass_model_training.batch_size: 16
+        binaryclass_model_training.epochs: 1
+        binaryclass_model_training.learning_rate: 0.01
+    outs:
+    - path: models/binaryclass/trained_binary_model.keras
+      hash: md5
+      md5: ad958dd984e99c924282acaf25cb407d
+      size: 94808272
+  multiclass_training:
+    cmd: python -m src.components.multiclassification.multiclass_training
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: 2fd0ed2d8df075b2ba2cc89326c0252d
+      size: 839
+    - path: src/components/multiclassification/multiclass_training.py
+      hash: md5
+      md5: 94cc815db9422537e70cab9c15d48592
+      size: 2398
+    params:
+      params.yaml:
+        multiclass_model_training.batch_size: 16
+        multiclass_model_training.epochs: 1
+        multiclass_model_training.learning_rate: 0.01
+    outs:
+    - path: models/multiclass/trained_multi_model.keras
+      hash: md5
+      md5: 5512540780befbc374c2a0d250aa2446
+      size: 94882016
+  binaryclass_evaluation:
+    cmd: python -m src.components.binaryclassification.binarymodel_evaluation
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: 2fd0ed2d8df075b2ba2cc89326c0252d
+      size: 839
+    - path: src/components/binaryclassification/binarymodel_evaluation.py
+      hash: md5
+      md5: 3007fe783e74c9d4b49267870a2711a0
+      size: 4086
+  multiclass_evaluation:
+    cmd: python -m src.components.multiclassification.multimodel_evaluation
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: 2fd0ed2d8df075b2ba2cc89326c0252d
+      size: 839
+    - path: src/components/multiclassification/multimodel_evaluation.py
+      hash: md5
+      md5: dd88f662a69843e2987b9710a12df163
+      size: 3776

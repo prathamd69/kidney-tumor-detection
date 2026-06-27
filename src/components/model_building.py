@@ -68,10 +68,14 @@ def main():
     config = loadYaml(Path("config/config.yaml"))
     params = loadYaml(Path("params.yaml"))
 
-    img_shape = (int(params.model_training.img_height), int(params.model_training.img_width))
-    lr = float(params.model_training.learning_rate)
+    img_shape = (int(params.model_building.img_height), int(params.model_building.img_width))
+
+    binary_lr = float(params.binaryclass_model_training.learning_rate)
+    multi_lr = float(params.multiclass_model_training.learning_rate)
+
     binaryloss = str(params.model_building.binary_loss)
     multiloss = str(params.model_building.multi_loss)
+
     metrics = list(params.model_building.metrics)
 
     OPTIMIZER_MAP= {
@@ -87,8 +91,8 @@ def main():
     base_multiclass_model_path = Path(config.model_paths.base_multiclass_model_path)
     
     logger.info("Building compiled ResNet50V2 baseline model architecture")
-    binarymodel = build_binary_model(img_shape, lr, binaryloss, metrics, optimizer_class)
-    multimodel = build_multi_model(img_shape, lr, multiloss, metrics, optimizer_class)
+    binarymodel = build_binary_model(img_shape, binary_lr, binaryloss, metrics, optimizer_class)
+    multimodel = build_multi_model(img_shape, multi_lr, multiloss, metrics, optimizer_class)
     
     base_binaryclass_model_path.parent.mkdir(parents=True, exist_ok=True)
     binarymodel.save(str(base_binaryclass_model_path))

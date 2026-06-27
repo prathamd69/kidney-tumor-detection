@@ -21,45 +21,51 @@ stages:
       - src/components/model_building.py
       - config/config.yaml
     params:
-      - model_training.img_height
-      - model_training.img_width
-      - model_training.learning_rate
+      - model_building.img_height
+      - model_building.img_width
+      - model_building.metrics
+      - model_building.binary_loss
+      - model_building.multi_loss
+      - model_building.optimizer
+      - model_building.num_classes
+      - binaryclass_model_training.learning_rate
+      - multiclass_model_training.learning_rate
     outs:
       - models/binaryclass/base_binary_model.keras
       - models/multiclass/base_multi_model.keras
 
   binaryclass_training:
-    cmd: python -m src.components.binaryclass_training
+    cmd: python -m src.components.binaryclassification.binaryclass_training
     deps:
-      - src/components/binaryclass_training.py
+      - src/components/binaryclassification/binaryclass_training.py
       - config/config.yaml
     params:
-      - model_training.batch_size
-      - model_training.epochs
-      - model_training.learning_rate
+      - binaryclass_model_training.batch_size
+      - binaryclass_model_training.epochs
+      - binaryclass_model_training.learning_rate
     outs:
       - models/binaryclass/trained_binary_model.keras
 
   multiclass_training:
-    cmd: python -m src.components.multiclass_training
+    cmd: python -m src.components.multiclassification.multiclass_training
     deps:
-      - src/components/multiclass_training.py
+      - src/components/multiclassification/multiclass_training.py
       - config/config.yaml
     params:
-      - model_training.batch_size
-      - model_training.epochs
-      - model_training.learning_rate
+      - multiclass_model_training.batch_size
+      - multiclass_model_training.epochs
+      - multiclass_model_training.learning_rate
     outs:
       - models/multiclass/trained_multi_model.keras
 
   binaryclass_evaluation:
-    cmd: python -m src.components.binarymodel_evaluation
+    cmd: python -m src.components.binaryclassification.binarymodel_evaluation
     deps:
-      - src/components/binarymodel_evaluation.py
+      - src/components/binaryclassification/binarymodel_evaluation.py
       - config/config.yaml
 
   multiclass_evaluation:
-      cmd: python -m src.components.multimodel_evaluation
+      cmd: python -m src.components.multiclassification.multimodel_evaluation
       deps:
-        - src/components/multimodel_evaluation.py
+        - src/components/multiclassification/multimodel_evaluation.py
         - config/config.yaml

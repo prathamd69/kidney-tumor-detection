@@ -227,6 +227,7 @@ mlruns/
 mlflow.db
 
 reports/
+models/
 
 image.jpg
 test.py

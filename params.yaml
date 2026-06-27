@@ -13,6 +13,8 @@ data_processing:
     3: 'Tumor'
   
 model_building:
+  img_height: 224
+  img_width: 224
   metrics: ["accuracy"]
   binary_loss: "binary_crossentropy"
   multi_loss: "sparse_categorical_crossentropy"
@@ -22,15 +24,11 @@ model_building:
 binaryclass_model_training:
   is_binaryClassification: True
   batch_size: 16
-  img_height: 224
-  img_width: 224
   epochs: 1
   learning_rate: 0.01
 
 multiclass_model_training:
   is_binaryClassification: False
   batch_size: 16
-  img_height: 224
-  img_width: 224
   epochs: 1
   learning_rate: 0.01

@@ -8,7 +8,7 @@ model_paths:
   base_binaryclass_model_path: models/binaryclass/base_binary_model.keras
   base_multiclass_model_path: models/multiclass/base_multi_model.keras
   trained_binaryclass_model_path: models/binaryclass/trained_binary_model.keras
-  trained_multiclass_model_path: models/multiclass/trained_multiclass_model.keras
+  trained_multiclass_model_path: models/multiclass/trained_multi_model.keras
 
 experiment_paths:
   binaryclass_experiment_name: binaryclass_CNNs
