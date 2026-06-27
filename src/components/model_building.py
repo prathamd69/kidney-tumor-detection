@@ -83,8 +83,8 @@ def main():
     opt_name = params.model_building.optimizer
     optimizer_class = OPTIMIZER_MAP.get(opt_name, tf.keras.optimizers.Adam)
 
-    base_binaryclass_model_path = Path(config.model_building.base_binaryclass_model_path)
-    base_multiclass_model_path = Path(config.model_building.base_multiclass_model_path)
+    base_binaryclass_model_path = Path(config.model_paths.base_binaryclass_model_path)
+    base_multiclass_model_path = Path(config.model_paths.base_multiclass_model_path)
     
     logger.info("Building compiled ResNet50V2 baseline model architecture")
     binarymodel = build_binary_model(img_shape, lr, binaryloss, metrics, optimizer_class)

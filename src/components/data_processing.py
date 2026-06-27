@@ -31,9 +31,9 @@ def main():
     config = loadYaml(Path("config/config.yaml"))
     params = loadYaml(Path("params.yaml"))
 
-    raw_path = Path(config.data_processing.raw_data_path)
-    train_path = Path(config.data_processing.train_data_path)
-    test_path = Path(config.data_processing.test_data_path)
+    raw_path = Path(config.data_paths.raw_data_path)
+    train_path = Path(config.data_paths.train_data_path)
+    test_path = Path(config.data_paths.test_data_path)
     
     test_size = float(params.data_processing.test_size)
     random_state = int(params.data_processing.random_state)

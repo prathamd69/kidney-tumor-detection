@@ -14,8 +14,8 @@ def main():
 
     is_binaryClassification = bool(params.model_training.is_binaryClassification)
 
-    base_binaryclass_model_path = Path(config.model_paths.base_binaryclass_model_path)
-    trained_binaryclass_model_path = Path(config.model_paths.trained_binaryclass_model_path)
+    base_multiclass_model_path = Path(config.model_paths.base_multiclass_model_path)
+    trained_multiclass_model_path = Path(config.model_paths.trained_multiclass_model_path)
 
     train_df = loadFile(Path(config.data_paths.train_data_path))
     images_dir = Path(config.data_paths.images_dir)
@@ -27,8 +27,8 @@ def main():
     train_dataset = create_dataset(train_df, images_dir, batch_size, img_shape, is_binaryClassification)
     
     # Configuring MLflow Tracking Experiments
-    experiment_name = str(config.experiment_paths.binaryclass_experiment_name)
-    run_name = str(config.experiment_paths.binaryclass_run_name)
+    experiment_name = str(config.experiment_paths.multiclass_experiment_name)
+    run_name = str(config.experiment_paths.multiclass_run_name)
 
     mlflow.set_experiment(experiment_name=experiment_name)
     
@@ -37,8 +37,8 @@ def main():
         params_dict = dict(params.model_training)
         mlflow.log_params(params_dict)
 
-        logger.info("Loading un-trained compiled model structure from %s", base_binaryclass_model_path)
-        model = tf.keras.models.load_model(str(base_binaryclass_model_path))
+        logger.info("Loading un-trained compiled model structure from %s", base_multiclass_model_path)
+        model = tf.keras.models.load_model(str(base_multiclass_model_path))
 
         logger.info("Executing network execution layers across %s training epochs...", epochs)
         model.fit(
@@ -48,10 +48,10 @@ def main():
         )
 
 
-        trained_binaryclass_model_path.parent.mkdir(parents=True, exist_ok=True)
-        model.save(str(trained_binaryclass_model_path))
+        trained_multiclass_model_path.parent.mkdir(parents=True, exist_ok=True)
+        model.save(str(trained_multiclass_model_path))
         mlflow.tensorflow.log_model(model=model, artifact_path="binaryclassmodels") # type:ignore
-        logger.info("Binaryclass trained architecture safely exported to local storage: %s", trained_binaryclass_model_path)
+        logger.info("Binaryclass trained architecture safely exported to local storage: %s", trained_multiclass_model_path)
 
 if __name__ == "__main__":
     main()
