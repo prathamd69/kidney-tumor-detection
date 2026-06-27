@@ -24,9 +24,9 @@ def main():
     images_dir = Path(config.data_paths.images_dir)
     trained_binaryclass_model_path = Path(config.model_paths.trained_binaryclass_model_path)
 
-    img_shape = (int(params.model_building.img_height), int(params.model_building.img_width))
-    batch_size = int(params.binaryclass_model_training.batch_size)
-    is_binaryClassification = bool(params.binaryclass_model_training.is_binaryClassification)
+    img_shape = (int(params.basic_model_params.img_height), int(params.basic_model_params.img_width))
+    batch_size = int(params.binaryclass_model_params.batch_size)
+    is_binaryClassification = bool(params.binaryclass_model_params.is_binaryClassification)
 
     experiment_name = str(config.experiment_paths.binaryclass_experiment_name)
     run_name = str(config.experiment_paths.binaryclass_run_name)

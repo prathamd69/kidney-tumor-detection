@@ -12,23 +12,25 @@ data_processing:
     2: 'Stone'
     3: 'Tumor'
   
-model_building:
+basic_model_params:
   img_height: 224
   img_width: 224
-  metrics: ["accuracy"]
-  binary_loss: "binary_crossentropy"
-  multi_loss: "sparse_categorical_crossentropy"
-  optimizer: "Adam"
-  num_classes: 4
 
-binaryclass_model_training:
+binaryclass_model_params:
   is_binaryClassification: True
-  batch_size: 16
+  metrics: ["accuracy"]
+  loss: "binary_crossentropy"
+  optimizer: "Adam"
+  batch_size: 32
   epochs: 1
   learning_rate: 0.01
 
-multiclass_model_training:
+multiclass_model_params:
   is_binaryClassification: False
-  batch_size: 16
+  metrics: ["accuracy"]
+  loss: "sparse_categorical_crossentropy"
+  optimizer: "Adam"
+  num_classes: 4
+  batch_size: 32
   epochs: 1
   learning_rate: 0.01

@@ -15,24 +15,42 @@ stages:
       - data/final/train.csv
       - data/final/test.csv
 
-  model_building:
-    cmd: python -m src.components.model_building
+  binary_base_model_building:
+    cmd: python -m src.components.binaryclassification.binarybase_model
     deps:
-      - src/components/model_building.py
+      - src/components/binaryclassification/binarybase_model.py
       - config/config.yaml
     params:
-      - model_building.img_height
-      - model_building.img_width
-      - model_building.metrics
-      - model_building.binary_loss
-      - model_building.multi_loss
-      - model_building.optimizer
-      - model_building.num_classes
-      - binaryclass_model_training.learning_rate
-      - multiclass_model_training.learning_rate
+      - basic_model_params.img_height
+      - basic_model_params.img_width
+      - binaryclass_model_params.metrics
+      - binaryclass_model_params.loss
+      - binaryclass_model_params.optimizer
+      - binaryclass_model_params.learning_rate
     outs:
       - models/binaryclass/base_binary_model.keras
+
+  multi_base_model_building:
+    cmd: python -m src.components.multiclassification.multibase_model
+    deps:
+      - src/components/multiclassification/multibase_model.py
+      - config/config.yaml
+    params:
+      - basic_model_params.img_height
+      - basic_model_params.img_width
+      - multiclass_model_params.metrics
+      - multiclass_model_params.loss
+      - multiclass_model_params.optimizer
+      - multiclass_model_params.num_classes
+      - multiclass_model_params.learning_rate
+    outs:
       - models/multiclass/base_multi_model.keras
+
+  binaryclass_evaluation:
+    cmd: python -m src.components.binaryclassification.binarymodel_evaluation
+    deps:
+      - src/components/binaryclassification/binarymodel_evaluation.py
+      - config/config.yaml
 
   binaryclass_training:
     cmd: python -m src.components.binaryclassification.binaryclass_training
@@ -40,9 +58,9 @@ stages:
       - src/components/binaryclassification/binaryclass_training.py
       - config/config.yaml
     params:
-      - binaryclass_model_training.batch_size
-      - binaryclass_model_training.epochs
-      - binaryclass_model_training.learning_rate
+      - binaryclass_model_params.batch_size
+      - binaryclass_model_params.epochs
+      - binaryclass_model_params.learning_rate
     outs:
       - models/binaryclass/trained_binary_model.keras
 
@@ -52,17 +70,11 @@ stages:
       - src/components/multiclassification/multiclass_training.py
       - config/config.yaml
     params:
-      - multiclass_model_training.batch_size
-      - multiclass_model_training.epochs
-      - multiclass_model_training.learning_rate
+      - multiclass_model_params.batch_size
+      - multiclass_model_params.epochs
+      - multiclass_model_params.learning_rate
     outs:
       - models/multiclass/trained_multi_model.keras
-
-  binaryclass_evaluation:
-    cmd: python -m src.components.binaryclassification.binarymodel_evaluation
-    deps:
-      - src/components/binaryclassification/binarymodel_evaluation.py
-      - config/config.yaml
 
   multiclass_evaluation:
       cmd: python -m src.components.multiclassification.multimodel_evaluation

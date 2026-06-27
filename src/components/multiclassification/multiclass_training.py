@@ -12,7 +12,7 @@ def main():
     config = loadYaml(Path("config/config.yaml"))
     params = loadYaml(Path("params.yaml"))
 
-    is_binaryClassification = bool(params.multiclass_model_training.is_binaryClassification)
+    is_binaryClassification = bool(params.multiclass_model_params.is_binaryClassification)
 
     base_multiclass_model_path = Path(config.model_paths.base_multiclass_model_path)
     trained_multiclass_model_path = Path(config.model_paths.trained_multiclass_model_path)
@@ -20,9 +20,9 @@ def main():
     train_df = loadFile(Path(config.data_paths.train_data_path))
     images_dir = Path(config.data_paths.images_dir)
     
-    img_shape = (int(params.model_building.img_height), int(params.model_building.img_width))
-    batch_size = int(params.multiclass_model_training.batch_size)
-    epochs = int(params.multiclass_model_training.epochs)
+    img_shape = (int(params.basic_model_params.img_height), int(params.basic_model_params.img_width))
+    batch_size = int(params.multiclass_model_params.batch_size)
+    epochs = int(params.multiclass_model_params.epochs)
 
     train_dataset = create_dataset(train_df, images_dir, batch_size, img_shape, is_binaryClassification)
     
@@ -34,7 +34,7 @@ def main():
     
     logger.info("Starting active MLflow tracking session...")
     with mlflow.start_run(run_name=run_name):
-        params_dict = dict(params.multiclass_model_training)
+        params_dict = dict(params.multiclass_model_params)
         mlflow.log_params(params_dict)
 
         logger.info("Loading un-trained compiled model structure from %s", base_multiclass_model_path)

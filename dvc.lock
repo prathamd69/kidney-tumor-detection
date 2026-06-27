@@ -120,17 +120,17 @@ stages:
       size: 839
     - path: src/components/binaryclassification/binaryclass_training.py
       hash: md5
-      md5: dca9a30424c1d92aa1a62fca87b649e6
-      size: 2415
+      md5: b9b62dcd5c0df79c7ee7e06289677c55
+      size: 2413
     params:
       params.yaml:
-        binaryclass_model_training.batch_size: 16
-        binaryclass_model_training.epochs: 1
-        binaryclass_model_training.learning_rate: 0.01
+        binaryclass_model_params.batch_size: 32
+        binaryclass_model_params.epochs: 1
+        binaryclass_model_params.learning_rate: 0.01
     outs:
     - path: models/binaryclass/trained_binary_model.keras
       hash: md5
-      md5: ad958dd984e99c924282acaf25cb407d
+      md5: 0eb804cd5a4feea594e11efe8cb50d89
       size: 94808272
   multiclass_training:
     cmd: python -m src.components.multiclassification.multiclass_training
@@ -141,18 +141,18 @@ stages:
       size: 839
     - path: src/components/multiclassification/multiclass_training.py
       hash: md5
-      md5: 94cc815db9422537e70cab9c15d48592
+      md5: 93619a0dbca864f94faaf487024f4440
       size: 2398
     params:
       params.yaml:
-        multiclass_model_training.batch_size: 16
-        multiclass_model_training.epochs: 1
-        multiclass_model_training.learning_rate: 0.01
+        multiclass_model_params.batch_size: 32
+        multiclass_model_params.epochs: 1
+        multiclass_model_params.learning_rate: 0.01
     outs:
     - path: models/multiclass/trained_multi_model.keras
       hash: md5
-      md5: 5512540780befbc374c2a0d250aa2446
-      size: 94882016
+      md5: 200336e94fce192f14e6600860ba09f1
+      size: 94881992
   binaryclass_evaluation:
     cmd: python -m src.components.binaryclassification.binarymodel_evaluation
     deps:
@@ -162,8 +162,8 @@ stages:
       size: 839
     - path: src/components/binaryclassification/binarymodel_evaluation.py
       hash: md5
-      md5: 3007fe783e74c9d4b49267870a2711a0
-      size: 4086
+      md5: 779222696ea4f3e537e43f12792682db
+      size: 4090
   multiclass_evaluation:
     cmd: python -m src.components.multiclassification.multimodel_evaluation
     deps:
@@ -173,5 +173,56 @@ stages:
       size: 839
     - path: src/components/multiclassification/multimodel_evaluation.py
       hash: md5
-      md5: dd88f662a69843e2987b9710a12df163
-      size: 3776
+      md5: 489db97ab895128e3ac9c27ff9678a2a
+      size: 3780
+  binary_base_model_building:
+    cmd: python -m src.components.binaryclassification.binarybase_model
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: 2fd0ed2d8df075b2ba2cc89326c0252d
+      size: 839
+    - path: src/components/binaryclassification/binarybase_model.py
+      hash: md5
+      md5: fc2de176b904d51a75eba039726bcb7e
+      size: 2329
+    params:
+      params.yaml:
+        basic_model_params.img_height: 224
+        basic_model_params.img_width: 224
+        binaryclass_model_params.learning_rate: 0.01
+        binaryclass_model_params.loss: binary_crossentropy
+        binaryclass_model_params.metrics:
+        - accuracy
+        binaryclass_model_params.optimizer: Adam
+    outs:
+    - path: models/binaryclass/base_binary_model.keras
+      hash: md5
+      md5: e40a2ccba36681ecec84070f53be1de3
+      size: 94785960
+  multi_base_model_building:
+    cmd: python -m src.components.multiclassification.multibase_model
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: 2fd0ed2d8df075b2ba2cc89326c0252d
+      size: 839
+    - path: src/components/multiclassification/multibase_model.py
+      hash: md5
+      md5: 5afe3440841560e41fd71a14334a793d
+      size: 2340
+    params:
+      params.yaml:
+        basic_model_params.img_height: 224
+        basic_model_params.img_width: 224
+        multiclass_model_params.learning_rate: 0.01
+        multiclass_model_params.loss: sparse_categorical_crossentropy
+        multiclass_model_params.metrics:
+        - accuracy
+        multiclass_model_params.num_classes: 4
+        multiclass_model_params.optimizer: Adam
+    outs:
+    - path: models/multiclass/base_multi_model.keras
+      hash: md5
+      md5: 051625b35c9eea2cee107b0042d2ac4c
+      size: 94810536
