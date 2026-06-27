@@ -28,10 +28,10 @@ stages:
       - models/binaryclass/base_binary_model.keras
       - models/multiclass/base_multi_model.keras
 
-  model_training:
-    cmd: python -m src.components.model_training
+  binaryclass_training:
+    cmd: python -m src.components.binaryclass_training
     deps:
-      - src/components/model_training.py
+      - src/components/binaryclass_training.py
       - config/config.yaml
     params:
       - model_training.batch_size
@@ -39,10 +39,27 @@ stages:
       - model_training.learning_rate
     outs:
       - models/binaryclass/trained_binary_model.keras
-      - models/multiclass/trained_multiclass_model.keras
 
-  model_evaluation:
-    cmd: python -m src.components.model_evaluation
+  multiclass_training:
+    cmd: python -m src.components.multiclass_training
     deps:
-      - src/components/model_evaluation.py
+      - src/components/multiclass_training.py
       - config/config.yaml
+    params:
+      - model_training.batch_size
+      - model_training.epochs
+      - model_training.learning_rate
+    outs:
+      - models/multiclass/trained_multi_model.keras
+
+  binaryclass_evaluation:
+    cmd: python -m src.components.binarymodel_evaluation
+    deps:
+      - src/components/binarymodel_evaluation.py
+      - config/config.yaml
+
+  multiclass_evaluation:
+      cmd: python -m src.components.multimodel_evaluation
+      deps:
+        - src/components/multimodel_evaluation.py
+        - config/config.yaml
