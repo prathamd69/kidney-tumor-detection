@@ -27,8 +27,8 @@ def main():
     train_dataset = create_dataset(train_df, images_dir, batch_size, img_shape, is_binaryClassification)
     
     # Configuring MLflow Tracking Experiments
-    experiment_name = str(config.experiment_paths.multiclass_experiment_name)
-    run_name = str(config.experiment_paths.multiclass_run_name)
+    experiment_name = str(params.multiclass_model_params.experiment_name)
+    run_name = str(params.multiclass_model_params.run_name)
 
     mlflow.set_experiment(experiment_name=experiment_name)
     

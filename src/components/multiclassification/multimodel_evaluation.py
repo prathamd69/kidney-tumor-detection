@@ -28,8 +28,8 @@ def main():
     batch_size = int(params.multiclass_model_params.batch_size)
     is_binaryClassification = bool(params.multiclass_model_params.is_binaryClassification)
 
-    experiment_name = str(config.experiment_paths.multiclass_experiment_name)
-    run_name = str(config.experiment_paths.multiclass_run_name)
+    experiment_name = str(params.multiclass_model_params.experiment_name)
+    run_name = str(params.multiclass_model_params.run_name)
     mlflow.set_experiment(experiment_name=experiment_name)
 
     metrics_path = Path(config.report_paths.multimodel_metrics_path)

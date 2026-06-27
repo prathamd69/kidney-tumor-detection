@@ -10,12 +10,6 @@ model_paths:
   trained_binaryclass_model_path: models/binaryclass/trained_binary_model.keras
   trained_multiclass_model_path: models/multiclass/trained_multi_model.keras
 
-experiment_paths:
-  binaryclass_experiment_name: binaryclass_CNNs
-  binaryclass_run_name: RESNET50V2_Evaluation_4
-  multiclass_experiment_name: multiclass_CNNs
-  multiclass_run_name: RESNET50V2_Evaluation_1
-
 report_paths:
   binarymodel_metrics_path: reports/binaryclass/metrics.json
   multimodel_metrics_path: reports/multiclass/metrics.json
