@@ -3,12 +3,27 @@ from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from contextlib import asynccontextmanager
 from fastapi.responses import HTMLResponse, JSONResponse
 from pathlib import Path
-from src.utils import configLogger
+import json
+from src.utils import configLogger, loadYaml
 from src.prediction import (ImageProcessor,
                             BinaryPredictor,
                             MultiPredictor)
 
 logger = configLogger("app","app.log")
+
+def read_descirpts() -> dict:
+
+    try:
+        config = loadYaml(Path("config/config.yaml"))
+        reports_path = Path(config.descripts_path)
+        with open(reports_path, "r") as f:   
+            class_descriptions = json.load(f)
+
+        return class_descriptions
+    
+    except Exception as e:
+        logger.exception("Failed to load class descriptions : %s", e)
+        raise
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -18,10 +33,14 @@ async def lifespan(app: FastAPI):
         img_processor = ImageProcessor()
         binary_pred = BinaryPredictor()
         multi_pred = MultiPredictor()
+
+        class_descripts = read_descirpts()
+        
         
         yield {"img_processor": img_processor,
                "binary_pred" : binary_pred,
-               "multi_pred" : multi_pred}
+               "multi_pred" : multi_pred,
+               "class_descripts" : class_descripts}
         
         # [SHUTDOWN LOGIC]: Executes when the server process terminates
         logger.info("Tearing down application infrastructure context.")
@@ -57,7 +76,7 @@ async def predict_binary(request: Request, file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Invalid file schema. Please upload a JPEG or PNG image.")
     
     try:
-        processor = request.state.processor
+        processor = request.state.img_processor
         binary_model = request.state.binary_model
         
         image_bytes = await file.read()
@@ -86,14 +105,19 @@ async def predict_detailed(request: Request, file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Please upload a JPEG or PNG image.")
     
     try:
-        processor = request.state.processor
+        processor = request.state.img_processor
         multi_model = request.state.multi_model
         
         image_bytes = await file.read()
         processed_tensor = processor.process(image_bytes)
         
         multi_result = multi_model.predict(processed_tensor)
-        
+        pred_class = multi_result["prediction"]
+
+        descriptions = request.state.class_descripts
+        report_text = descriptions.get(pred_class, "Description not available for this class.")
+        multi_result["medical_description"] = report_text
+
         if multi_result["status"] == "error":
             raise HTTPException(status_code=500, detail=multi_result["message"])
                 
