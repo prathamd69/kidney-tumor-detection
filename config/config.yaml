@@ -15,4 +15,4 @@ report_paths:
   multimodel_metrics_path: reports/multiclass/metrics.json
 
 descripts_path:
-  descriptions : class_descriptions.json
+  class_descriptions_path : class_descriptions.json

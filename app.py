@@ -15,7 +15,7 @@ def read_descirpts() -> dict:
 
     try:
         config = loadYaml(Path("config/config.yaml"))
-        reports_path = Path(config.descripts_path)
+        reports_path = Path(config.descripts_path.class_descriptions_path)
         with open(reports_path, "r") as f:   
             class_descriptions = json.load(f)
 
@@ -77,12 +77,12 @@ async def predict_binary(request: Request, file: UploadFile = File(...)):
     
     try:
         processor = request.state.img_processor
-        binary_model = request.state.binary_model
+        binary_pred = request.state.binary_pred
         
         image_bytes = await file.read()
         processed_tensor = processor.process(image_bytes)
         
-        binary_result = binary_model.predict(processed_tensor)
+        binary_result = binary_pred.predict(processed_tensor)
         
         if binary_result["status"] == "error":
             raise HTTPException(status_code=500, detail=binary_result["message"])
@@ -106,12 +106,12 @@ async def predict_detailed(request: Request, file: UploadFile = File(...)):
     
     try:
         processor = request.state.img_processor
-        multi_model = request.state.multi_model
+        multi_pred = request.state.multi_pred
         
         image_bytes = await file.read()
         processed_tensor = processor.process(image_bytes)
         
-        multi_result = multi_model.predict(processed_tensor)
+        multi_result = multi_pred.predict(processed_tensor)
         pred_class = multi_result["prediction"]
 
         descriptions = request.state.class_descripts

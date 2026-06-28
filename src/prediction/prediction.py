@@ -35,7 +35,7 @@ class BinaryPredictor:
     def __init__(self) -> None:
         try:
             config = loadYaml(Path("config/config.yaml"))
-            self.model_path = Path(config.model_paths.trained_binary_model_path)
+            self.model_path = Path(config.model_paths.trained_binaryclass_model_path)
             
             logger.info("Loading serialized Keras binary model from %s", self.model_path)
             self.model = tf.keras.models.load_model(str(self.model_path))
@@ -94,7 +94,8 @@ class MultiPredictor:
                 for idx, prob in enumerate(prediction_probabs)
             }
 
-            logger.info("Inference successful (Multi) - Predicted: %s with confidence %.4f", prediction_class, confidence)
+            logger.info("Inference successful (Multi) - Predicted: %s : %s", 
+                        prediction_class, raw_probs_dict)
             
             return {
                 "status": "success",
