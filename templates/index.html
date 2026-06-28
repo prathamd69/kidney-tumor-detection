@@ -3,146 +3,375 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kidney Tumor Detection Platform</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between">
-
-    <header class="border-b border-slate-800 bg-slate-950/50 backdrop-blur p-4">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold tracking-tight text-emerald-400">NephroScan <span class="text-slate-400 font-normal">AI</span></h1>
-            <span class="text-xs bg-slate-800 text-slate-400 px-2.5 py-1 rounded-full font-mono">v0.0.1</span>
-        </div>
-    </header>
-
-    <main class="flex-grow max-w-2xl w-full mx-auto p-4 flex flex-col justify-center">
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-6">
-            
-            <div class="text-center space-y-2">
-                <h2 class="text-2xl font-bold">Kidney Tumor Diagnostic Screening</h2>
-                <p class="text-sm text-slate-400">Upload a processed abdominal CT scan slice (PNG/JPG) for immediate diagnostic prediction analytics.</p>
-            </div>
-
-            <div id="drop-zone" class="border-2 border-dashed border-slate-700 hover:border-emerald-500/50 rounded-xl p-8 text-center cursor-pointer transition bg-slate-900/30 group">
-                <input type="file" id="file-input" class="hidden" accept=".png,.jpg,.jpeg">
-                <div class="space-y-3" id="upload-prompt">
-                    <div class="text-4xl text-slate-500 group-hover:text-emerald-400 transition">📸</div>
-                    <p class="text-sm font-medium">Click to upload or drag and drop image file</p>
-                    <p class="text-xs text-slate-500">Supports JPEG, JPG, and PNG files</p>
-                </div>
-                <img id="image-preview" class="hidden max-h-64 mx-auto rounded-lg border border-slate-700 shadow-md">
-            </div>
-
-            <button id="analyze-btn" disabled class="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-600 text-white font-semibold py-3 px-4 rounded-xl transition shadow-lg shadow-emerald-900/20 disabled:shadow-none flex justify-center items-center space-x-2">
-                <span>Analyze Scan Architecture</span>
-            </button>
-
-            <div id="results-card" class="hidden border rounded-xl p-5 bg-slate-900/50 space-y-4">
-                <div class="flex justify-between items-center">
-                    <span class="text-sm font-medium text-slate-400">Diagnostic Verdict:</span>
-                    <span id="verdict-badge" class="px-3 py-1 text-xs font-bold uppercase rounded-md"></span>
-                </div>
-                <div class="space-y-1.5">
-                    <div class="flex justify-between text-xs text-slate-400">
-                        <span>Prediction Certainty Profile:</span>
-                        <span id="confidence-text" class="font-mono font-bold">0%</span>
-                    </div>
-                    <div class="w-full bg-slate-800 rounded-full h-2">
-                        <div id="confidence-bar" class="h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </main>
-
-    <footer class="text-center p-4 text-xs text-slate-600 font-mono">
-        In-Memory Deployment Architecture Base
-    </footer>
-
-    <script>
-        const fileInput = document.getElementById('file-input');
-        const dropZone = document.getElementById('drop-zone');
-        const analyzeBtn = document.getElementById('analyze-btn');
-        const uploadPrompt = document.getElementById('upload-prompt');
-        const imagePreview = document.getElementById('image-preview');
-        const resultsCard = document.getElementById('results-card');
-        const verdictBadge = document.getElementById('verdict-badge');
-        const confidenceText = document.getElementById('confidence-text');
-        const confidenceBar = document.getElementById('confidence-bar');
-
-        let selectedFile = null;
-
-        // Route clicks into hidden file input fields
-        dropZone.addEventListener('click', () => fileInput.click());
-
-        fileInput.addEventListener('change', (e) => {
-            if(e.target.files.length) handleFileSelection(e.target.files[0]);
-        });
-
-        // Simple Drag and Drop Event Listeners
-        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-emerald-500'); });
-        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-emerald-500'));
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('border-emerald-500');
-            if(e.dataTransfer.files.length) handleFileSelection(e.dataTransfer.files[0]);
-        });
-
-        function handleFileSelection(file) {
-            selectedFile = file;
-            analyzeBtn.disabled = false;
-            resultsCard.classList.add('hidden');
-            
-            // Handle instant frontend thumbnail previewing
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                imagePreview.src = e.target.result;
-                imagePreview.classList.remove('hidden');
-                uploadPrompt.classList.add('hidden');
-            }
-            reader.readAsDataURL(file);
+    <title>Kidney Tumor Detection API</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --dark: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --success: #10b981;
         }
 
-        analyzeBtn.addEventListener('click', async () => {
-            if(!selectedFile) return;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
 
-            // Update UI state to Processing Loader
-            analyzeBtn.disabled = true;
-            analyzeBtn.innerText = "Processing Matrix Signatures...";
-            resultsCard.classList.add('hidden');
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            margin-top: 2rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .upload-section {
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .upload-section:hover {
+            border-color: var(--secondary);
+            background: rgba(79, 172, 254, 0.05);
+        }
+
+        #imageInput {
+            display: none;
+        }
+
+        .upload-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .upload-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        #imagePreview {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-top: 1rem;
+            display: none;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            display: none;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: #000;
+        }
+
+        .btn-warning {
+            background: linear-gradient(to right, #f59e0b, #ef4444);
+            color: #fff;
+        }
+
+        .btn-primary:hover, .btn-warning:hover {
+            opacity: 0.9;
+        }
+
+        .results-container {
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .result-card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--secondary);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result-card.danger { border-left-color: var(--danger); }
+        .result-card.success { border-left-color: var(--success); }
+
+        .result-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .description {
+            margin-top: 0.8rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #cbd5e1;
+        }
+
+        /* Loading Spinner */
+        .loader {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top: 3px solid var(--primary);
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 10px;
+            display: none;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .error-message {
+            color: var(--danger);
+            margin-top: 1rem;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>NephroScan</h1>
+        <p class="subtitle">Advanced Deep Learning CT Scan Screening</p>
+    </header>
+
+    <div class="container">
+        <div class="upload-section" id="dropZone">
+            <label for="imageInput" class="upload-btn">Choose CT Scan Image</label>
+            <input type="file" id="imageInput" accept=".jpg, .jpeg, .png">
+            <p style="color: var(--text-muted); font-size: 0.9rem;">or drag and drop here</p>
+            <img id="imagePreview" alt="CT Scan Preview">
+        </div>
+
+        <button id="scanBtn" class="action-btn btn-primary">
+            <span class="loader" id="scanLoader"></span>
+            <span id="scanText">Run Initial Screening</span>
+        </button>
+
+        <div id="errorMessage" class="error-message"></div>
+
+        <div id="resultsWrapper" class="results-container">
+            <!-- Binary Result Card -->
+            <div id="binaryCard" class="result-card">
+                <div class="result-label">Initial Screening Result</div>
+                <div id="binaryPrediction" class="result-value">--</div>
+                <div class="description" id="binaryConfidence">Confidence: --%</div>
+            </div>
+
+            <button id="detailedBtn" class="action-btn btn-warning">
+                <span class="loader" id="detailedLoader"></span>
+                <span id="detailedText">Request Detailed Diagnosis</span>
+            </button>
+
+            <!-- Detailed Result Card -->
+            <div id="detailedCard" class="result-card" style="display: none; margin-top: 1.5rem;">
+                <div class="result-label">Detailed Analysis</div>
+                <div id="multiPrediction" class="result-value">--</div>
+                <div class="description" id="multiDescription">--</div>
+                <div class="confidence" id="multiConfidence">Confidence: --%</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const scanBtn = document.getElementById('scanBtn');
+        const detailedBtn = document.getElementById('detailedBtn');
+        const resultsWrapper = document.getElementById('resultsWrapper');
+        const binaryCard = document.getElementById('binaryCard');
+        const detailedCard = document.getElementById('detailedCard');
+        const errorMessage = document.getElementById('errorMessage');
+
+        let currentFile = null;
+
+        // 1. Handle File Upload & Preview
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                currentFile = file;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    scanBtn.style.display = 'block';
+                    
+                    // Reset UI on new image upload
+                    resultsWrapper.style.display = 'none';
+                    detailedCard.style.display = 'none';
+                    detailedBtn.style.display = 'none';
+                    errorMessage.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 2. Handle Binary Prediction (Endpoint 1)
+        scanBtn.addEventListener('click', async () => {
+            if (!currentFile) return;
+
+            // UI Loading State
+            document.getElementById('scanLoader').style.display = 'inline-block';
+            document.getElementById('scanText').innerText = 'Processing...';
+            scanBtn.disabled = true;
+            errorMessage.style.display = 'none';
 
             const formData = new FormData();
-            formData.append("file", selectedFile);
+            formData.append('file', currentFile);
 
             try {
-                // Post image array bytes to your backend FastAPI server route
-                const response = await fetch('/predict', { method: 'POST', body: formData });
+                const response = await fetch('/predict/binary', {
+                    method: 'POST',
+                    body: formData
+                });
+                
                 const data = await response.json();
 
-                if(!response.ok) throw new Error(data.detail || "Inference Engine Exception.");
+                if (!response.ok) throw new Error(data.detail || "Server error occurred.");
 
-                // Map analytics to output elements
-                const percent = (data.confidence * 100).toFixed(1) + '%';
-                confidenceText.innerText = percent;
-                confidenceBar.style.width = percent;
+                const result = data.binary_screening;
+                const isTumor = result.prediction === "Tumor";
 
-                verdictBadge.innerText = data.prediction;
-                if(data.prediction === "Tumor") {
-                    verdictBadge.className = "px-3 py-1 text-xs font-bold uppercase rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20";
-                    confidenceBar.className = "h-2 rounded-full transition-all duration-500 bg-rose-500";
+                // Update UI with results
+                document.getElementById('binaryPrediction').innerText = result.prediction;
+                document.getElementById('binaryPrediction').style.color = isTumor ? 'var(--danger)' : 'var(--success)';
+                document.getElementById('binaryConfidence').innerText = `Model Confidence: ${(result.confidence * 100).toFixed(1)}%`;
+                
+                binaryCard.className = `result-card ${isTumor ? 'danger' : 'success'}`;
+                resultsWrapper.style.display = 'block';
+
+                // THE FIX: Always show the detailed button, but make the text context-aware
+                detailedBtn.style.display = 'block';
+                if (isTumor) {
+                    document.getElementById('detailedText').innerText = 'Request Detailed Tumor Analysis';
                 } else {
-                    verdictBadge.className = "px-3 py-1 text-xs font-bold uppercase rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
-                    confidenceBar.className = "h-2 rounded-full transition-all duration-500 bg-emerald-500";
+                    document.getElementById('detailedText').innerText = 'Scan for Cysts or Stones';
                 }
 
-                resultsCard.classList.remove('hidden');
-
-            } catch (err) {
-                alert(`Error: ${err.message}`);
+            } catch (error) {
+                errorMessage.innerText = error.message;
+                errorMessage.style.display = 'block';
             } finally {
-                analyzeBtn.disabled = false;
-                analyzeBtn.innerText = "Analyze Scan Architecture";
+                // Reset Loading State
+                document.getElementById('scanLoader').style.display = 'none';
+                document.getElementById('scanText').innerText = 'Run Initial Screening';
+                scanBtn.disabled = false;
+            }
+        });
+
+        // 3. Handle Detailed Prediction (Endpoint 2)
+        detailedBtn.addEventListener('click', async () => {
+            if (!currentFile) return;
+
+            document.getElementById('detailedLoader').style.display = 'inline-block';
+            document.getElementById('detailedText').innerText = 'Analyzing sub-types...';
+
+            detailedBtn.disabled = true;
+            errorMessage.style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('file', currentFile);
+
+            try {
+                const response = await fetch('/predict/detailed', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.detail || "Server error occurred.");
+
+                const details = data.detailed_diagnosis;
+
+                // Update Detailed UI
+                document.getElementById('multiPrediction').innerText = details.prediction;
+                document.getElementById('multiDescription').innerText = details.medical_description;
+                document.getElementById('multiConfidence').innerText = `Model Confidence: ${(details.confidence * 100).toFixed(1)}%`;
+                
+                detailedCard.style.display = 'block';
+                detailedBtn.style.display = 'none'; // Hide button after success
+
+            } catch (error) {
+                errorMessage.innerText = error.message;
+                errorMessage.style.display = 'block';
+                detailedBtn.disabled = false;
+                document.getElementById('detailedText').innerText = 'Request Detailed Diagnosis';
+            } finally {
+                document.getElementById('detailedLoader').style.display = 'none';
             }
         });
     </script>
