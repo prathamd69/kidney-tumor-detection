@@ -4,7 +4,7 @@ import tensorflow as tf
 import mlflow
 from src.utils import configLogger
 from src.utils import loadFile, loadYaml
-from src.utils import create_dataset
+from src.utils import create_training_dataset
 
 logger = configLogger("binarymodel_training", "binarymodel_training.log")
     
@@ -24,11 +24,16 @@ def main():
     batch_size = int(params.binaryclass_model_params.batch_size)
     epochs = int(params.binaryclass_model_params.epochs)
 
-    train_dataset = create_dataset(train_df, images_dir, batch_size, img_shape, is_binaryClassification)
+    train_dataset = create_training_dataset(train_df, images_dir, batch_size, img_shape, is_binaryClassification)
     
     # Configuring MLflow Tracking Experiments
     experiment_name = str(params.binaryclass_model_params.experiment_name)
     run_name = str(params.binaryclass_model_params.run_name)
+
+    early_stopping = tf.keras.callbacks.EarlyStopping(
+    monitor='val_loss',
+    patience=3,
+    restore_best_weights=True)
 
     mlflow.set_experiment(experiment_name=experiment_name)
     
@@ -44,6 +49,7 @@ def main():
         model.fit(
             train_dataset, 
             epochs=epochs,
+            callbacks = [early_stopping],
             verbose=1
         )
 
