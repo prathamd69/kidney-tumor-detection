@@ -47,6 +47,7 @@ async def home():
         logger.error("Failed to render frontend template: %s", e)
         raise HTTPException(status_code=500, detail="User interface template missing on server.")
 
+
 @app.post("/predict/binary", tags=["Inference Engine"])
 async def predict_binary(request: Request, file: UploadFile = File(...)):
 
@@ -78,6 +79,30 @@ async def predict_binary(request: Request, file: UploadFile = File(...)):
         logger.exception("Internal application error: %s", e)
         raise HTTPException(status_code=500, detail=f"Internal Server Failure: {str(e)}")
 
+
+@app.post("/predict/detailed", tags=["Inference Engine"])
+async def predict_detailed(request: Request, file: UploadFile = File(...)):
+    if not str(file.filename).lower().endswith(('.jpg', '.jpeg', '.png')):
+        raise HTTPException(status_code=400, detail="Please upload a JPEG or PNG image.")
+    
+    try:
+        processor = request.state.processor
+        multi_model = request.state.multi_model
+        
+        image_bytes = await file.read()
+        processed_tensor = processor.process(image_bytes)
+        
+        multi_result = multi_model.predict(processed_tensor)
+        
+        if multi_result["status"] == "error":
+            raise HTTPException(status_code=500, detail=multi_result["message"])
+                
+        return JSONResponse(content={"detailed_diagnosis": multi_result})
+        
+    except Exception as e:
+        logger.exception("Internal application error: %s", e)
+        raise HTTPException(status_code=500, detail=f"Internal Server Failure: {str(e)}")
+    
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=8080, reload=True)
 
