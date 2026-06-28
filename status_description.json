@@ -1,0 +1,6 @@
+{
+    "Normal": "The scan shows healthy kidney tissue with no visible anomalies, cysts, or tumors.",
+    "Tumor": "A solid mass was detected. This requires immediate clinical evaluation by an oncologist or urologist for biopsy and treatment planning.",
+    "Cyst": "A fluid-filled sac was detected. Kidney cysts are often benign and common as people age, but should be monitored by a doctor.",
+    "Stone": "A hard deposit of minerals and salts (kidney stone) was detected. Treatment depends on the size and location."
+}
