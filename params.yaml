@@ -7,10 +7,10 @@ data_processing:
     2: 0
     3: 1
   relation_map:
-    0: 'Cyst'
-    1: 'Normal'
-    2: 'Stone'
-    3: 'Tumor'
+    {0: 'Cyst',
+    1: 'Normal',
+    2: 'Stone',
+    3: 'Tumor'}
   
 basic_model_params:
   img_height: 224

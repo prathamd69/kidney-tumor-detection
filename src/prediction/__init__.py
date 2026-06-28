@@ -1,3 +1,3 @@
-from .prediction import Predictor
+from .prediction import BinaryPredictor, MultiPredictor
 
-__all__ =["Predictor"]
+__all__ =["BinaryPredictor", "MultiPredictor"]
