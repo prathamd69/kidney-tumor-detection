@@ -12,7 +12,7 @@ import mlflow
 import json
 from src.utils import configLogger
 from src.utils import loadFile, loadYaml
-from src.utils import create_testing_dataset
+from src.components.binaryclassification import testing
 
 logger = configLogger("binarymodel_evaluation", "binarymodel_evaluation.log")
 
@@ -20,13 +20,7 @@ def main():
     config = loadYaml(Path("config/config.yaml"))
     params = loadYaml(Path("params.yaml"))
 
-    test_df = loadFile(Path(config.data_paths.test_data_path)) 
-    images_dir = Path(config.data_paths.images_dir)
-    trained_binaryclass_model_path = Path(config.model_paths.trained_binaryclass_model_path)
-
-    img_shape = (int(params.basic_model_params.img_height), int(params.basic_model_params.img_width))
-    batch_size = int(params.binaryclass_model_params.batch_size)
-    is_binaryClassification = bool(params.binaryclass_model_params.is_binaryClassification)
+    trained_binaryweights_path = Path(config.model_paths.trained_binaryweights_path )
 
     experiment_name = str(params.binaryclass_model_params.experiment_name)
     run_name = str(params.binaryclass_model_params.run_name)
@@ -36,17 +30,17 @@ def main():
     metrics_path.parent.mkdir(parents=True, exist_ok=True)
 
     logger.info("Building evaluation data streaming pipeline...")
-    eval_dataset = create_testing_dataset(test_df, images_dir, batch_size, img_shape, is_binaryClassification)
-
-    logger.info("Loading trained model from %s", trained_binaryclass_model_path)
-    model = tf.keras.models.load_model(str(trained_binaryclass_model_path))
+    logger.info("Loading trained weights from %s", trained_binaryweights_path)
+    
+    eval_dataset, labels, model = testing(config=config, params=params)
+    model.load_weights(trained_binaryweights_path)
 
     logger.info("Generating predictions over evaluation dataset...")
     y_probs = model.predict(eval_dataset, verbose=1).flatten()
     
     # Convert sigmoid probabilities to binary 0 or 1 classes (threshold = 0.5)
     y_pred = (y_probs > 0.5).astype(int)
-    y_true = test_df['binarytarget'].astype('int32').to_numpy()
+    y_true = labels
     
     logger.info("Starting active MLflow evaluation tracking session...")
     with mlflow.start_run(run_name=run_name):
@@ -60,46 +54,46 @@ def main():
         cm = confusion_matrix(y_true, y_pred)
         tn, fp, fn, tp = map(int, cm.ravel())
 
-    mlflow.log_metric("eval_accuracy", acc)
-    mlflow.log_metric("eval_precision", prec)
-    mlflow.log_metric("eval_recall", rec)
-    mlflow.log_metric("eval_f1_score", f1)
-    mlflow.log_metric("eval_roc_auc", auc)
-    mlflow.log_metric("true_negatives", tn)
-    mlflow.log_metric("false_positives", fp)
-    mlflow.log_metric("false_negatives", fn)
-    mlflow.log_metric("true_positives", tp)
+        mlflow.log_metric("eval_accuracy", acc)
+        mlflow.log_metric("eval_precision", prec)
+        mlflow.log_metric("eval_recall", rec)
+        mlflow.log_metric("eval_f1_score", f1)
+        mlflow.log_metric("eval_roc_auc", auc)
+        mlflow.log_metric("true_negatives", tn)
+        mlflow.log_metric("false_positives", fp)
+        mlflow.log_metric("false_negatives", fn)
+        mlflow.log_metric("true_positives", tp)
         
-    logger.info("Metrics successfully tracked to MLflow Experiment Dashboard.")
+        logger.info("Metrics successfully tracked to MLflow Experiment Dashboard.")
 
-    metrics_payload = {
-        "run_name": run_name,
-        "accuracy": acc,
-        "precision": prec,
-        "recall_sensitivity": rec,
-        "f1_score": f1,
-        "roc_auc": auc,
-        "confusion_matrix": {
-            "true_normal_tn": tn,
-            "false_tumor_fp": fp,
-            "false_normal_fn": fn,
-            "true_tumor_tp": tp
+        metrics_payload = {
+            "run_name": run_name,
+            "accuracy": acc,
+            "precision": prec,
+            "recall_sensitivity": rec,
+            "f1_score": f1,
+            "roc_auc": auc,
+            "confusion_matrix": {
+                "true_normal_tn": tn,
+                "false_tumor_fp": fp,
+                "false_normal_fn": fn,
+                "true_tumor_tp": tp
+                }
             }
-        }
 
-    if metrics_path.exists():
-        with open(metrics_path, "r") as f:
-            metrics_history = json.load(f)
-    else:
-        metrics_history = []
+        if metrics_path.exists():
+            with open(metrics_path, "r") as f:
+                metrics_history = json.load(f)
+        else:
+            metrics_history = []
 
-    metrics_history.append(metrics_payload)
+        metrics_history.append(metrics_payload)
 
-    with open(metrics_path, "w") as f:
-        json.dump(metrics_history, f, indent=4)
-            
-    logger.info("Metrics dictionary successfully saved locally to %s", metrics_path)
-    mlflow.log_artifact(str(metrics_path), artifact_path="binary_evaluation_reports")
+        with open(metrics_path, "w") as f:
+            json.dump(metrics_history, f, indent=4)
+                
+        logger.info("Metrics dictionary successfully saved locally to %s", metrics_path)
+        mlflow.log_artifact(str(metrics_path), artifact_path="binary_evaluation_reports")
 
 if __name__ == "__main__":
     main()
