@@ -15,10 +15,10 @@ stages:
       - data/final/train.csv
       - data/final/test.csv
 
-  binary_base_model_building:
-    cmd: python -m src.components.binaryclassification.binarybase_model
+  binaryclass_training:
+    cmd: python -m src.components.binaryclassification.binaryclass_training
     deps:
-      - src/components/binaryclassification/binarybase_model.py
+      - src/components/binaryclassification/binaryclass_training.py
       - config/config.yaml
     params:
       - basic_model_params.img_height
@@ -27,22 +27,11 @@ stages:
       - binaryclass_model_params.loss
       - binaryclass_model_params.optimizer
       - binaryclass_model_params.learning_rate
-    outs:
-      - models/binaryclass/base_binary_model.keras
-
-  binaryclass_training:
-    cmd: python -m src.components.binaryclassification.binaryclass_training
-    deps:
-      - src/components/binaryclassification/binaryclass_training.py
-      - config/config.yaml
-    params:
       - binaryclass_model_params.batch_size
       - binaryclass_model_params.epochs
-      - binaryclass_model_params.learning_rate
     outs:
-      - models/binaryclass/trained_binary_model.keras
+      - models/binaryclass/binarymodel_weights.h5
 
-  
   binaryclass_evaluation:
     cmd: python -m src.components.binaryclassification.binarymodel_evaluation
     deps:
@@ -52,11 +41,10 @@ stages:
       - binaryclass_model_params.experiment_name
       - binaryclass_model_params.run_name
 
-
-  multi_base_model_building:
-    cmd: python -m src.components.multiclassification.multibase_model
+  multiclass_training:
+    cmd: python -m src.components.multiclassification.multiclass_training
     deps:
-      - src/components/multiclassification/multibase_model.py
+      - src/components/multiclassification/multiclass_training.py
       - config/config.yaml
     params:
       - basic_model_params.img_height
@@ -64,22 +52,11 @@ stages:
       - multiclass_model_params.metrics
       - multiclass_model_params.loss
       - multiclass_model_params.optimizer
-      - multiclass_model_params.num_classes
       - multiclass_model_params.learning_rate
-    outs:
-      - models/multiclass/base_multi_model.keras
-
-  multiclass_training:
-    cmd: python -m src.components.multiclassification.multiclass_training
-    deps:
-      - src/components/multiclassification/multiclass_training.py
-      - config/config.yaml
-    params:
       - multiclass_model_params.batch_size
       - multiclass_model_params.epochs
-      - multiclass_model_params.learning_rate
     outs:
-      - models/multiclass/trained_multi_model.keras
+      - models/multiclass/multimodel_weights.h5
 
   multiclass_evaluation:
       cmd: python -m src.components.multiclassification.multimodel_evaluation

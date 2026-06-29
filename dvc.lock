@@ -5,8 +5,8 @@ stages:
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 1508b8d31d3941dcd01b6c9f3c112438
-      size: 625
+      md5: 9aa1f26e903405e79448d563a2a3ccdc
+      size: 536
     - path: data/raw/images
       hash: md5
       md5: 9dc4cb1700ebd6d8c89682e682aff6a4.dir
@@ -33,16 +33,16 @@ stages:
           1: 0
           2: 0
           3: 1
-        data_processing.test_size: 0.25
+        data_processing.test_size: 0.2
     outs:
     - path: data/final/test.csv
       hash: md5
-      md5: a8cc517fced25359669e5a4642db56a3
-      size: 58408
+      md5: bd3c96870449a3ffb9140f04c0f79e7a
+      size: 46720
     - path: data/final/train.csv
       hash: md5
-      md5: 79e451adaee3ccc362b92f4c555a9993
-      size: 175066
+      md5: 533b925b34d5822643707228a2865ce5
+      size: 186754
   model_building:
     cmd: python -m src.components.model_building
     deps:
@@ -116,76 +116,88 @@ stages:
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 1508b8d31d3941dcd01b6c9f3c112438
-      size: 625
+      md5: 9aa1f26e903405e79448d563a2a3ccdc
+      size: 536
     - path: src/components/binaryclassification/binaryclass_training.py
       hash: md5
-      md5: 9e473cabace46777f95217cd2334f741
-      size: 2405
+      md5: 749f44f8664b26bb749fd4ec305436f4
+      size: 1772
     params:
       params.yaml:
-        binaryclass_model_params.batch_size: 32
-        binaryclass_model_params.epochs: 5
-        binaryclass_model_params.learning_rate: 0.005
+        basic_model_params.img_height: 224
+        basic_model_params.img_width: 224
+        binaryclass_model_params.batch_size: 64
+        binaryclass_model_params.epochs: 10
+        binaryclass_model_params.learning_rate: 0.001
+        binaryclass_model_params.loss: binary_crossentropy
+        binaryclass_model_params.metrics:
+        - accuracy
+        binaryclass_model_params.optimizer: Adamax
     outs:
-    - path: models/binaryclass/trained_binary_model.keras
+    - path: models/binaryclass/binarymodel_weights.h5
       hash: md5
-      md5: 3ae325b53d7ad2d9e6e09f19c8188cda
-      size: 94808272
+      md5: cf9515ffd31c4bb3e1955deff172b61e
+      size: 16825616
   multiclass_training:
     cmd: python -m src.components.multiclassification.multiclass_training
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 1508b8d31d3941dcd01b6c9f3c112438
-      size: 625
+      md5: 9aa1f26e903405e79448d563a2a3ccdc
+      size: 536
     - path: src/components/multiclassification/multiclass_training.py
       hash: md5
-      md5: faf31cbc82254fbc4fd559a00a2ab4ae
-      size: 2390
+      md5: fa990bfec13163b1ed93b81527bbf25c
+      size: 1900
     params:
       params.yaml:
-        multiclass_model_params.batch_size: 32
+        basic_model_params.img_height: 224
+        basic_model_params.img_width: 224
+        multiclass_model_params.batch_size: 64
         multiclass_model_params.epochs: 10
-        multiclass_model_params.learning_rate: 0.005
+        multiclass_model_params.learning_rate: 0.001
+        multiclass_model_params.loss: sparse_categorical_crossentropy
+        multiclass_model_params.metrics:
+        - accuracy
+        multiclass_model_params.optimizer: Adamax
     outs:
-    - path: models/multiclass/trained_multi_model.keras
+    - path: models/multiclass/multimodel_weights.h5
       hash: md5
-      md5: b2d70cfd25dc4c5d4dd4d4aa6da57a5c
-      size: 94881992
+      md5: 3a8dee58fa4d5f9475f784a825e46bd1
+      size: 16826576
   binaryclass_evaluation:
     cmd: python -m src.components.binaryclassification.binarymodel_evaluation
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 1508b8d31d3941dcd01b6c9f3c112438
-      size: 625
+      md5: 9aa1f26e903405e79448d563a2a3ccdc
+      size: 536
     - path: src/components/binaryclassification/binarymodel_evaluation.py
       hash: md5
-      md5: 8b77129c34f508a9dbc0304baa511229
-      size: 4082
+      md5: 5d84248b1ea6168f29aea6f7a23007cb
+      size: 3754
     params:
       params.yaml:
         binaryclass_model_params.experiment_name: binaryclass_CNNs
-        binaryclass_model_params.run_name: RESNET50V2_Evaluation_1
+        binaryclass_model_params.run_name: EfficientNETB0_Evaluation_1
   multiclass_evaluation:
     cmd: python -m src.components.multiclassification.multimodel_evaluation
     deps:
     - path: src/components/multiclassification/multimodel_evaluation.py
       hash: md5
-      md5: acfa820f6d10b93e2ffe5a2562045e13
-      size: 3772
+      md5: 0f227e39c45ac64373e7d29575795829
+      size: 3359
     params:
       params.yaml:
         multiclass_model_params.experiment_name: multiclass_CNNs
-        multiclass_model_params.run_name: RESNET50V2_Evaluation_1
+        multiclass_model_params.run_name: EfficientNETB0_Evaluation_1
   binary_base_model_building:
     cmd: python -m src.components.binaryclassification.binarybase_model
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 1508b8d31d3941dcd01b6c9f3c112438
-      size: 625
+      md5: 68cdaf61d32038b3446b02b9f015ddaa
+      size: 697
     - path: src/components/binaryclassification/binarybase_model.py
       hash: md5
       md5: fc2de176b904d51a75eba039726bcb7e
@@ -194,39 +206,29 @@ stages:
       params.yaml:
         basic_model_params.img_height: 224
         basic_model_params.img_width: 224
-        binaryclass_model_params.learning_rate: 0.005
+        binaryclass_model_params.learning_rate: 0.001
         binaryclass_model_params.loss: binary_crossentropy
         binaryclass_model_params.metrics:
         - accuracy
         binaryclass_model_params.optimizer: Adam
-    outs:
-    - path: models/binaryclass/base_binary_model.keras
-      hash: md5
-      md5: d5a3639dddad9d0a4db9101218652f52
-      size: 94785960
   multi_base_model_building:
     cmd: python -m src.components.multiclassification.multibase_model
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 1508b8d31d3941dcd01b6c9f3c112438
-      size: 625
+      md5: 68cdaf61d32038b3446b02b9f015ddaa
+      size: 697
     - path: src/components/multiclassification/multibase_model.py
       hash: md5
-      md5: 5afe3440841560e41fd71a14334a793d
-      size: 2340
+      md5: 4a9f326bf25ec958a724a9bcec7e94ca
+      size: 2519
     params:
       params.yaml:
         basic_model_params.img_height: 224
         basic_model_params.img_width: 224
-        multiclass_model_params.learning_rate: 0.005
+        multiclass_model_params.learning_rate: 0.0001
         multiclass_model_params.loss: sparse_categorical_crossentropy
         multiclass_model_params.metrics:
         - accuracy
         multiclass_model_params.num_classes: 4
         multiclass_model_params.optimizer: Adam
-    outs:
-    - path: models/multiclass/base_multi_model.keras
-      hash: md5
-      md5: fbaaccf160ab80ddfa8bbec299e62b9e
-      size: 94810536

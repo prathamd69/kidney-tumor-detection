@@ -1,5 +1,5 @@
 data_processing:
-  test_size: 0.25
+  test_size: 0.20
   random_state: 27
   target_mapping:
     0: 0
@@ -12,6 +12,14 @@ data_processing:
     2: 'Stone',
     3: 'Tumor'}
   
+model_architecture:
+  base_model: "EfficientNetB0"
+  include_top: false
+  pooling: "max"
+  dense_units: 64
+  dropout_rate: 0.3
+  activation: "relu"
+
 basic_model_params:
   img_height: 224
   img_width: 224
@@ -20,21 +28,22 @@ binaryclass_model_params:
   is_binaryClassification: True
   metrics: ["accuracy"]
   loss: "binary_crossentropy"
-  optimizer: "Adam"
-  batch_size: 32
-  epochs: 5
-  learning_rate: 0.005
+  optimizer: "Adamax"
+  num_classes: 2
+  batch_size: 64
+  epochs: 10
+  learning_rate: 0.001
   experiment_name: binaryclass_CNNs
-  run_name: RESNET50V2_Evaluation_1
+  run_name: EfficientNETB0_Evaluation_1
 
 multiclass_model_params:
   is_binaryClassification: False
   metrics: ["accuracy"]
   loss: "sparse_categorical_crossentropy"
-  optimizer: "Adam"
+  optimizer: "Adamax"
   num_classes: 4
-  batch_size: 32
+  batch_size: 64
   epochs: 10
-  learning_rate: 0.005
+  learning_rate: 0.001
   experiment_name: multiclass_CNNs
-  run_name: RESNET50V2_Evaluation_1
+  run_name: EfficientNETB0_Evaluation_1
