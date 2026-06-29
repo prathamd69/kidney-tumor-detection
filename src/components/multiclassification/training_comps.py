@@ -6,9 +6,9 @@ import numpy as np
 from src.utils import build_base_model, create_training_dataset, create_testing_dataset, loadFile
 
 
-def _get_model(params: ConfigBox, img_shape: Tuple[int, int]) -> tf.keras.Model:
+def _get_model_multi(params: ConfigBox) -> tf.keras.Model:
     return build_base_model(
-        img_shape=img_shape,
+        img_shape= (params.basic_model_params.img_height, params.basic_model_params.img_width),
         lr=float(params.multiclass_model_params.learning_rate),
         loss=str(params.multiclass_model_params.loss),
         metrics=list(params.multiclass_model_params.metrics),
@@ -31,15 +31,7 @@ def training(config: ConfigBox, params: ConfigBox) -> Tuple[tf.data.Dataset, tf.
         params.multiclass_model_params.is_binaryClassification
     )
 
-    model = build_base_model(
-        img_shape=img_shape,
-        lr=params.multiclass_model_params.learning_rate,
-        loss=params.multiclass_model_params.loss,
-        metrics=params.multiclass_model_params.metrics,
-        optimizer=params.multiclass_model_params.optimizer,
-        is_binaryClassification=params.multiclass_model_params.is_binaryClassification,
-        num_classes=params.multiclass_model_params.num_classes
-    )
+    model =_get_model_multi(params)
 
     return train_dataset, val_dataset, model
 
@@ -56,14 +48,6 @@ def testing(config: ConfigBox, params: ConfigBox) -> Tuple[tf.data.Dataset, np.n
         params.multiclass_model_params.is_binaryClassification
     )
 
-    model = build_base_model(
-        img_shape=img_shape,
-        lr=params.multiclass_model_params.learning_rate,
-        loss=params.multiclass_model_params.loss,
-        metrics=params.multiclass_model_params.metrics,
-        optimizer=params.multiclass_model_params.optimizer,
-        is_binaryClassification=params.multiclass_model_params.is_binaryClassification,
-        num_classes=params.multiclass_model_params.num_classes
-    )
+    model =_get_model_multi(params)
 
     return test_dataset, labels, model

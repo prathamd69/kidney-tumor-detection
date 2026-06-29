@@ -3,6 +3,8 @@ from pathlib import Path
 import tensorflow as tf
 from src.utils import configLogger
 from src.utils import loadYaml
+from src.components.binaryclassification import _get_model_binary
+from src.components.multiclassification import _get_model_multi
 
 logger = configLogger("prediction", "prediction.log")
 
@@ -22,7 +24,6 @@ class ImageProcessor:
         try:
             image = tf.image.decode_jpeg(imagebytes, channels=3)
             image = tf.image.resize(image, (self.image_height, self.image_width))
-            image = image / 255.0
             image = tf.expand_dims(image, axis=0)
             return image
         
@@ -35,10 +36,12 @@ class BinaryPredictor:
     def __init__(self) -> None:
         try:
             config = loadYaml(Path("config/config.yaml"))
-            self.model_path = Path(config.model_paths.trained_binaryclass_model_path)
+            params = loadYaml(Path("params.yaml"))
+            self.weights_path = Path(config.model_paths.trained_binaryweights_path)
             
-            logger.info("Loading serialized Keras binary model from %s", self.model_path)
-            self.model = tf.keras.models.load_model(str(self.model_path))
+            logger.info("Loading serialized Keras binary weights from %s", self.weights_path)
+            self.model = _get_model_binary(params)
+            self.model.load_weights(self.weights_path)
             
         except Exception as e:
             logger.exception("Failed to initialize the BinaryPredictor: %s", e)
@@ -70,12 +73,13 @@ class MultiPredictor:
         try:
             config = loadYaml(Path("config/config.yaml"))
             params = loadYaml(Path("params.yaml"))
+            self.weights_path = Path(config.model_paths.trained_multiweights_path)
             
-            self.model_path = Path(config.model_paths.trained_multiclass_model_path)
+            logger.info("Loading serialized Keras multi weights from %s", self.weights_path)
+            self.model = _get_model_multi(params)
+            self.model.load_weights(self.weights_path)
+            
             self.relation_map = dict(params.data_processing.relation_map)
-            
-            logger.info("Loading serialized Keras multi-class model from %s", self.model_path)
-            self.model = tf.keras.models.load_model(str(self.model_path))
             
         except Exception as e:
             logger.exception("Failed to initialize the MultiPredictor: %s", e)
