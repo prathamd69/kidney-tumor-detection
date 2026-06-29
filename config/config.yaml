@@ -5,11 +5,9 @@ data_paths:
   images_dir: data/raw/images
 
 model_paths:
-  base_binaryclass_model_path: models/binaryclass/base_binary_model.keras
-  base_multiclass_model_path: models/multiclass/base_multi_model.keras
-  trained_binaryclass_model_path: models/binaryclass/trained_binary_model.keras
-  trained_multiclass_model_path: models/multiclass/trained_multi_model.keras
-
+  trained_binaryweights_path: models/binaryclass/binarymodel_weights.h5
+  trained_multiweights_path: models/multiclass/multimodel_weights.h5
+  
 report_paths:
   binarymodel_metrics_path: reports/binaryclass/metrics.json
   multimodel_metrics_path: reports/multiclass/metrics.json
