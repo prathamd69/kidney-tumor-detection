@@ -24,7 +24,7 @@ def main():
     batch_size = int(params.binaryclass_model_params.batch_size)
     epochs = int(params.binaryclass_model_params.epochs)
 
-    train_dataset = create_training_dataset(train_df, images_dir, batch_size, img_shape, is_binaryClassification)
+    train_dataset, val_dataset = create_training_dataset(train_df, images_dir, batch_size, img_shape, is_binaryClassification)
     
     # Configuring MLflow Tracking Experiments
     experiment_name = str(params.binaryclass_model_params.experiment_name)
@@ -49,6 +49,7 @@ def main():
         model.fit(
             train_dataset, 
             epochs=epochs,
+            validation_data = val_dataset,
             callbacks = [early_stopping],
             verbose=1
         )

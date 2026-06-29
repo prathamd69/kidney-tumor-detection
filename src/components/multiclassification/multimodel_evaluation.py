@@ -12,7 +12,7 @@ import mlflow
 import json
 from src.utils import configLogger
 from src.utils import loadFile, loadYaml
-from src.utils import create_dataset
+from src.utils import create_testing_dataset
 
 logger = configLogger("binarymodel_evaluation", "binarymodel_evaluation.log")
 
@@ -36,7 +36,7 @@ def main():
     metrics_path.parent.mkdir(parents=True, exist_ok=True)
 
     logger.info("Building evaluation data streaming pipeline...")
-    eval_dataset = create_dataset(test_df, images_dir, batch_size, img_shape, is_binaryClassification)
+    eval_dataset = create_testing_dataset(test_df, images_dir, batch_size, img_shape, is_binaryClassification)
 
     logger.info("Loading trained model from %s", trained_multiclass_model_path)
     model = tf.keras.models.load_model(str(trained_multiclass_model_path))

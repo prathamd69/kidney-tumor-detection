@@ -24,6 +24,10 @@ def build_multi_model(
     
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
+
+    x = tf.keras.layers.Dense(256, activation='relu')(x)
+    x = tf.keras.layers.Dropout(0.1)(x)
+
     output_layer = Dense(num_classes, activation='softmax')(x)
 
     model = Model(inputs=base_model.input, outputs=output_layer)
