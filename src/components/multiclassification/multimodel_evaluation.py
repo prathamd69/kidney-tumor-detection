@@ -12,21 +12,15 @@ import mlflow
 import json
 from src.utils import configLogger
 from src.utils import loadFile, loadYaml
-from src.utils import create_testing_dataset
+from src.components.multiclassification import testing
 
-logger = configLogger("binarymodel_evaluation", "binarymodel_evaluation.log")
+logger = configLogger("multimodel_evaluation", "multimodel_evaluation.log")
 
 def main():
     config = loadYaml(Path("config/config.yaml"))
     params = loadYaml(Path("params.yaml"))
 
-    test_df = loadFile(Path(config.data_paths.test_data_path)) 
-    images_dir = Path(config.data_paths.images_dir)
-    trained_multiclass_model_path = Path(config.model_paths.trained_multiclass_model_path)
-
-    img_shape = (int(params.basic_model_params.img_height), int(params.basic_model_params.img_width))
-    batch_size = int(params.multiclass_model_params.batch_size)
-    is_binaryClassification = bool(params.multiclass_model_params.is_binaryClassification)
+    trained_multiweights_path = Path(config.model_paths.trained_multiweights_path )
 
     experiment_name = str(params.multiclass_model_params.experiment_name)
     run_name = str(params.multiclass_model_params.run_name)
@@ -36,17 +30,16 @@ def main():
     metrics_path.parent.mkdir(parents=True, exist_ok=True)
 
     logger.info("Building evaluation data streaming pipeline...")
-    eval_dataset = create_testing_dataset(test_df, images_dir, batch_size, img_shape, is_binaryClassification)
-
-    logger.info("Loading trained model from %s", trained_multiclass_model_path)
-    model = tf.keras.models.load_model(str(trained_multiclass_model_path))
+    logger.info("Loading trained weights from %s", trained_multiweights_path)
+    
+    eval_dataset, labels, model = testing(config=config, params=params)
+    model.load_weights(trained_multiweights_path)
 
     logger.info("Generating predictions over evaluation dataset...")
     y_probs = model.predict(eval_dataset, verbose=1)
-
-    # Using np.argmax to extract classes from softmax values
+    
     y_pred = np.argmax(y_probs, axis=1)
-    y_true = test_df['target'].astype('int32').to_numpy()
+    y_true = labels
     
     logger.info("Starting active MLflow evaluation tracking session...")
     with mlflow.start_run(run_name=run_name):
@@ -60,37 +53,38 @@ def main():
 
         cm_payload = cm.tolist()
 
-    mlflow.log_metric("eval_accuracy", acc)
-    mlflow.log_metric("eval_precision", prec)
-    mlflow.log_metric("eval_recall", rec)
-    mlflow.log_metric("eval_f1_score", f1)
-    mlflow.log_metric("eval_roc_auc", auc)
-    
-    logger.info("Metrics successfully tracked to MLflow Experiment Dashboard.")
+        mlflow.log_metric("eval_accuracy", acc)
+        mlflow.log_metric("eval_precision", prec)
+        mlflow.log_metric("eval_recall", rec)
+        mlflow.log_metric("eval_f1_score", f1)
+        mlflow.log_metric("eval_roc_auc", auc)
+        
+        logger.info("Metrics successfully tracked to MLflow Experiment Dashboard.")
 
-    metrics_payload = {
-        "run_name": run_name,
-        "accuracy": acc,
-        "precision": prec,
-        "recall_sensitivity": rec,
-        "f1_score": f1,
-        "roc_auc": auc,
-        "confusion_matrix": cm_payload
-        }
+        metrics_payload = {
+            "run_name": run_name,
+            "accuracy": acc,
+            "precision": prec,
+            "recall_sensitivity": rec,
+            "f1_score": f1,
+            "roc_auc": auc,
+            "confusion_matrix": cm_payload
+            }
 
-    if metrics_path.exists():
-        with open(metrics_path, "r") as f:
-            metrics_history = json.load(f)
-    else:
-        metrics_history = []
 
-    metrics_history.append(metrics_payload)
+        if metrics_path.exists():
+            with open(metrics_path, "r") as f:
+                metrics_history = json.load(f)
+        else:
+            metrics_history = []
 
-    with open(metrics_path, "w") as f:
-        json.dump(metrics_history, f, indent=4)
-            
-    logger.info("Metrics dictionary successfully saved locally to %s", metrics_path)
-    mlflow.log_artifact(str(metrics_path), artifact_path="multi_evaluation_reports")
+        metrics_history.append(metrics_payload)
+
+        with open(metrics_path, "w") as f:
+            json.dump(metrics_history, f, indent=4)
+                
+        logger.info("Metrics dictionary successfully saved locally to %s", metrics_path)
+        mlflow.log_artifact(str(metrics_path), artifact_path="multi_evaluation_reports")
 
 if __name__ == "__main__":
     main()
