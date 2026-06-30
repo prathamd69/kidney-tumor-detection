@@ -6,7 +6,7 @@ from tensorflow.keras.layers import(Dense, Dropout, BatchNormalization) # type:i
 from tensorflow.keras.models import Model # type:ignore
 from src.utils import configLogger, loadYaml
 
-logger = configLogger("training_methods", "training_methods.log")
+logger = configLogger("buildbaseModel", "build_baseModel.log")
 
 
 def build_base_model(
