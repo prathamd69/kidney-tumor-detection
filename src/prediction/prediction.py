@@ -1,10 +1,8 @@
 import numpy as np
 from pathlib import Path
 import tensorflow as tf
-from src.utils import configLogger
-from src.utils import loadYaml
-from src.components.binaryclassification import _get_model_binary
-from src.components.multiclassification import _get_model_multi
+from src.utils import configLogger, loadYaml 
+from src.utils import ModelPipelineFactory
 
 logger = configLogger("prediction", "prediction.log")
 
@@ -12,9 +10,10 @@ class ImageProcessor:
     """Handles configuration loading and transforms raw image bytes into a reusable tensor once."""
     def __init__(self) -> None:
         try:
-            self.params = loadYaml(Path("params.yaml"))
-            self.image_height = int(self.params.basic_model_params.img_height)
-            self.image_width = int(self.params.basic_model_params.img_width)
+            # Reusing the factory setup to extract safe global image shapes
+            params = loadYaml(Path("params.yaml"))
+            self.image_height = int(params.basic_model_params.img_height)
+            self.image_width = int(params.basic_model_params.img_width)
             
         except Exception as e:
             logger.exception("Failed to load configurations for ImageProcessor: %s", e)
@@ -37,11 +36,17 @@ class BinaryPredictor:
         try:
             config = loadYaml(Path("config/config.yaml"))
             params = loadYaml(Path("params.yaml"))
-            self.weights_path = Path(config.model_paths.trained_binaryweights_path)
+            
+            # Spin up the factory specifically for binary configuration mapping
+            pipeline = ModelPipelineFactory(config, params, is_binaryClassification=True)
+            self.weights_path = pipeline.weights_path
+            
+            logger.info("Initializing Binary Predictor. Building graph architecture...")
+            # Factory handles generating the fully compiled Keras structural instance
+            self.model = pipeline.model_config()
             
             logger.info("Loading serialized Keras binary weights from %s", self.weights_path)
-            self.model = _get_model_binary(params)
-            self.model.load_weights(self.weights_path)
+            self.model.load_weights(str(self.weights_path))
             
         except Exception as e:
             logger.exception("Failed to initialize the BinaryPredictor: %s", e)
@@ -73,11 +78,16 @@ class MultiPredictor:
         try:
             config = loadYaml(Path("config/config.yaml"))
             params = loadYaml(Path("params.yaml"))
-            self.weights_path = Path(config.model_paths.trained_multiweights_path)
+            
+            # Spin up the factory specifically for multiclass configuration mapping
+            pipeline = ModelPipelineFactory(config, params, is_binaryClassification=False)
+            self.weights_path = pipeline.weights_path
+            
+            logger.info("Initializing Multiclass Predictor. Building graph architecture...")
+            self.model = pipeline.model_config()
             
             logger.info("Loading serialized Keras multi weights from %s", self.weights_path)
-            self.model = _get_model_multi(params)
-            self.model.load_weights(self.weights_path)
+            self.model.load_weights(str(self.weights_path))
             
             self.relation_map = dict(params.data_processing.relation_map)
             
