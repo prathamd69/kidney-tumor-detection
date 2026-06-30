@@ -1,48 +1,52 @@
-from pathlib import Path
-import pandas as pd
-import numpy as np
-import tensorflow as tf
-from sklearn.metrics import (confusion_matrix,
-                             roc_auc_score, 
-                             accuracy_score,
-                             precision_score,
-                             recall_score,
-                             f1_score)
-import mlflow
 import json
-from src.utils import configLogger
-from src.utils import loadFile, loadYaml
-from src.components.binaryclassification import testing
+import mlflow
+from pathlib import Path
+from sklearn.metrics import (
+    accuracy_score,
+    confusion_matrix,
+    f1_score,
+    precision_score,
+    recall_score,
+    roc_auc_score,
+)
+from src.utils import (ModelPipelineFactory, 
+                       configLogger, loadYaml)
 
 logger = configLogger("binarymodel_evaluation", "binarymodel_evaluation.log")
 
+
 def main():
+    logger.info("Loading configuration files...")
     config = loadYaml(Path("config/config.yaml"))
     params = loadYaml(Path("params.yaml"))
 
-    trained_binaryweights_path = Path(config.model_paths.trained_binaryweights_path )
+    # centralized pipeline factory
+    pipeline = ModelPipelineFactory(config, params, is_binaryClassification=True)
 
-    experiment_name = str(params.binaryclass_model_params.experiment_name)
-    run_name = str(params.binaryclass_model_params.run_name)
+    # Pulling metadata and paths directly from factory properties
+    binaryweights = pipeline.weights_path
+    experiment_name, run_name = pipeline.experiment_meta
+
     mlflow.set_experiment(experiment_name=experiment_name)
 
-    metrics_path = Path(config.report_paths.binarymodel_metrics_path)
+    metrics_path = pipeline.metrics_path
     metrics_path.parent.mkdir(parents=True, exist_ok=True)
 
-    logger.info("Building evaluation data streaming pipeline...")
-    logger.info("Loading trained weights from %s", trained_binaryweights_path)
-    
-    eval_dataset, labels, model = testing(config=config, params=params)
-    model.load_weights(trained_binaryweights_path)
+    # Manufacturing the data stream and network graph using the factory
+    logger.info("Building evaluation data streaming pipeline and model architecture...")
+    eval_dataset, labels, model = pipeline.testing_components()
+
+    logger.info("Loading trained weights from: %s", binaryweights)
+    model.load_weights(str(binaryweights))
 
     logger.info("Generating predictions over evaluation dataset...")
     y_probs = model.predict(eval_dataset, verbose=1).flatten()
-    
+
     # Convert sigmoid probabilities to binary 0 or 1 classes (threshold = 0.5)
     y_pred = (y_probs > 0.5).astype(int)
     y_true = labels
-    
-    logger.info("Starting active MLflow evaluation tracking session...")
+
+    logger.info("Starting active MLflow evaluation tracking session for Run: %s", run_name)
     with mlflow.start_run(run_name=run_name):
 
         acc = float(accuracy_score(y_true, y_pred))
@@ -50,9 +54,11 @@ def main():
         rec = float(recall_score(y_true, y_pred))
         f1 = float(f1_score(y_true, y_pred))
         auc = float(roc_auc_score(y_true, y_probs))
-        
+
         cm = confusion_matrix(y_true, y_pred)
         tn, fp, fn, tp = map(int, cm.ravel())
+
+        logger.info("Metrics computed -> Acc: %.4f | Prec: %.4f | Rec: %.4f | F1: %.4f", acc, prec, rec, f1)
 
         mlflow.log_metric("eval_accuracy", acc)
         mlflow.log_metric("eval_precision", prec)
@@ -63,7 +69,7 @@ def main():
         mlflow.log_metric("false_positives", fp)
         mlflow.log_metric("false_negatives", fn)
         mlflow.log_metric("true_positives", tp)
-        
+
         logger.info("Metrics successfully tracked to MLflow Experiment Dashboard.")
 
         metrics_payload = {
@@ -77,10 +83,11 @@ def main():
                 "true_normal_tn": tn,
                 "false_tumor_fp": fp,
                 "false_normal_fn": fn,
-                "true_tumor_tp": tp
-                }
-            }
+                "true_tumor_tp": tp,
+            },
+        }
 
+        # Handling metrics compilation history append logic
         if metrics_path.exists():
             with open(metrics_path, "r") as f:
                 metrics_history = json.load(f)
@@ -91,9 +98,13 @@ def main():
 
         with open(metrics_path, "w") as f:
             json.dump(metrics_history, f, indent=4)
-                
-        logger.info("Metrics dictionary successfully saved locally to %s", metrics_path)
+
+        logger.info("Metrics report appended locally to %s", metrics_path)
+
+        logger.info("Uploading metrics report artifact to MLflow server...")
         mlflow.log_artifact(str(metrics_path), artifact_path="binary_evaluation_reports")
+        logger.info("Binary pipeline evaluation execution completed successfully.")
+
 
 if __name__ == "__main__":
     main()
