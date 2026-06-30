@@ -23,7 +23,6 @@ def loadFile(filePath: str | Path) -> pd.DataFrame:
         logger.exception("Unexpected error while loading file at %s : %s", filePath, e)
         raise
 
-
 def saveFile(filePath: str | Path, data: pd.DataFrame) -> None:
     try:
         filePath = Path(filePath)
