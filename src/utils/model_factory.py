@@ -59,7 +59,7 @@ class ModelPipelineFactory:
             num_classes=self.num_classes
         )
 
-    def training(self) -> Tuple[tf.data.Dataset, tf.data.Dataset, tf.keras.Model]:
+    def training_components(self) -> Tuple[tf.data.Dataset, tf.data.Dataset, tf.keras.Model]:
         
         logger.info("Loading training dataframe from %s", self.trainpath)
         train_df = loadFile(self.trainpath)
@@ -76,7 +76,7 @@ class ModelPipelineFactory:
         logger.info("Training and validation data streaming pipelines initialized.")
         return train_dataset, val_dataset, model
 
-    def testing(self) -> Tuple[tf.data.Dataset, np.ndarray, tf.keras.Model]:
+    def testing_components(self) -> Tuple[tf.data.Dataset, np.ndarray, tf.keras.Model]:
 
         logger.info("Loading testing dataframe from %s", self.testpath)
         test_df = loadFile(self.testpath)
@@ -93,3 +93,27 @@ class ModelPipelineFactory:
 
         logger.info("Testing dataset pipeline created. Extracted %d true ground labels.", len(labels))
         return test_dataset, labels, model
+    
+    @property
+    def weights_path(self) -> Path:
+        if self.is_binaryClassification:
+            return Path(self._modelpaths.binaryweights_path)
+        return Path(self._modelpaths.multiweights_path)
+
+    @property
+    def experiment_meta(self) -> tuple[str, str]:
+        return str(self._modelparams.experiment_name), str(self._modelparams.run_name)
+    
+    @property
+    def getparams(self) -> ConfigBox:
+        params = {
+            'learning_rate' : self.lr,
+            'loss' : self.loss,
+            'metrics' : self.metrics,
+            'optimizer' : self.optimizer,
+            'num_classes' : self.num_classes,
+            'batch_size' : self.batch_size,
+            'epochs' : self.epochs
+            }
+        params = ConfigBox(params)
+        return params

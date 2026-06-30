@@ -4,13 +4,11 @@ data_paths:
   test_data_path: data/final/test.csv
   images_dir: data/raw/images
 
-model_paths:
-  trained_binaryweights_path: models/binaryclass/binarymodel_weights.h5
-  trained_multiweights_path: models/multiclass/multimodel_weights.h5
-  
-report_paths:
-  binarymodel_metrics_path: reports/binaryclass/metrics.json
-  multimodel_metrics_path: reports/multiclass/metrics.json
+artifacts_paths:
+  binaryweights: models/binaryclass/binarymodel_weights.h5
+  multiweights: models/multiclass/multimodel_weights.h5
+  binarymetrics: reports/binaryclass/metrics.json
+  multimetrics: reports/multiclass/metrics.json
 
 descripts_path:
   class_descriptions_path : class_descriptions.json
