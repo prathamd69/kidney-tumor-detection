@@ -31,7 +31,7 @@ binaryclass_model_params:
   optimizer: "Adamax"
   num_classes: 2
   batch_size: 64
-  epochs: 10
+  epochs: 15
   learning_rate: 0.001
   experiment_name: binaryclass_CNNs
   run_name: EfficientNETB0_Evaluation_1
@@ -43,7 +43,7 @@ multiclass_model_params:
   optimizer: "Adamax"
   num_classes: 4
   batch_size: 64
-  epochs: 10
+  epochs: 25
   learning_rate: 0.001
   experiment_name: multiclass_CNNs
   run_name: EfficientNETB0_Evaluation_1

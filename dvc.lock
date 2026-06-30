@@ -5,8 +5,8 @@ stages:
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 9aa1f26e903405e79448d563a2a3ccdc
-      size: 536
+      md5: 400e574d6943e48da53480cb3bc76d3f
+      size: 473
     - path: data/raw/images
       hash: md5
       md5: 9dc4cb1700ebd6d8c89682e682aff6a4.dir
@@ -116,18 +116,18 @@ stages:
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 9aa1f26e903405e79448d563a2a3ccdc
-      size: 536
+      md5: 400e574d6943e48da53480cb3bc76d3f
+      size: 473
     - path: src/components/binaryclassification/binaryclass_training.py
       hash: md5
-      md5: 749f44f8664b26bb749fd4ec305436f4
-      size: 1772
+      md5: 9a799475c06b371247d14da6231ccbb8
+      size: 2408
     params:
       params.yaml:
         basic_model_params.img_height: 224
         basic_model_params.img_width: 224
         binaryclass_model_params.batch_size: 64
-        binaryclass_model_params.epochs: 10
+        binaryclass_model_params.epochs: 1
         binaryclass_model_params.learning_rate: 0.001
         binaryclass_model_params.loss: binary_crossentropy
         binaryclass_model_params.metrics:
@@ -136,25 +136,25 @@ stages:
     outs:
     - path: models/binaryclass/binarymodel_weights.h5
       hash: md5
-      md5: cf9515ffd31c4bb3e1955deff172b61e
+      md5: f7721d6cde1977f9df587ebb648abbc3
       size: 16825616
   multiclass_training:
     cmd: python -m src.components.multiclassification.multiclass_training
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 9aa1f26e903405e79448d563a2a3ccdc
-      size: 536
+      md5: 400e574d6943e48da53480cb3bc76d3f
+      size: 473
     - path: src/components/multiclassification/multiclass_training.py
       hash: md5
-      md5: fa990bfec13163b1ed93b81527bbf25c
-      size: 1900
+      md5: 6edea5d2e9ec42df488818f969144be8
+      size: 2402
     params:
       params.yaml:
         basic_model_params.img_height: 224
         basic_model_params.img_width: 224
         multiclass_model_params.batch_size: 64
-        multiclass_model_params.epochs: 10
+        multiclass_model_params.epochs: 1
         multiclass_model_params.learning_rate: 0.001
         multiclass_model_params.loss: sparse_categorical_crossentropy
         multiclass_model_params.metrics:
@@ -163,34 +163,34 @@ stages:
     outs:
     - path: models/multiclass/multimodel_weights.h5
       hash: md5
-      md5: 3a8dee58fa4d5f9475f784a825e46bd1
+      md5: cb6bbb76bda77552a03b1ccb446fc3a4
       size: 16826576
   binaryclass_evaluation:
     cmd: python -m src.components.binaryclassification.binarymodel_evaluation
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 9aa1f26e903405e79448d563a2a3ccdc
-      size: 536
+      md5: 400e574d6943e48da53480cb3bc76d3f
+      size: 473
     - path: src/components/binaryclassification/binarymodel_evaluation.py
       hash: md5
-      md5: 5d84248b1ea6168f29aea6f7a23007cb
-      size: 3754
+      md5: 2ab81f68dfec033bb6d32882986c9d66
+      size: 3982
     params:
       params.yaml:
         binaryclass_model_params.experiment_name: binaryclass_CNNs
-        binaryclass_model_params.run_name: EfficientNETB0_Evaluation_1
+        binaryclass_model_params.run_name: test_run1
   multiclass_evaluation:
     cmd: python -m src.components.multiclassification.multimodel_evaluation
     deps:
     - path: src/components/multiclassification/multimodel_evaluation.py
       hash: md5
-      md5: 0f227e39c45ac64373e7d29575795829
-      size: 3359
+      md5: 82c936e17e0905410bb9d144f5df150d
+      size: 3793
     params:
       params.yaml:
         multiclass_model_params.experiment_name: multiclass_CNNs
-        multiclass_model_params.run_name: EfficientNETB0_Evaluation_1
+        multiclass_model_params.run_name: test_run1
   binary_base_model_building:
     cmd: python -m src.components.binaryclassification.binarybase_model
     deps:

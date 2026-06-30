@@ -17,7 +17,7 @@ class ModelPipelineFactory:
         self.is_binaryClassification = is_binaryClassification
 
         # setting up common attributes
-        self._artifactspaths = ConfigBox(config.artifacts_path)
+        self._artifactspaths = ConfigBox(config.artifacts_paths)
         self._basicparams = ConfigBox(params.basic_model_params)
         self._datapaths = ConfigBox(config.data_paths)
 
@@ -26,7 +26,7 @@ class ModelPipelineFactory:
         # setting up data paths
         self.trainpath = Path(self._datapaths.train_data_path)
         self.testpath = Path(self._datapaths.test_data_path)
-        self.imagesdir = Path(self._datapaths.imagesdir)
+        self.imagesdir = Path(self._datapaths.images_dir)
 
         # setting up model attributes and paths
         if self.is_binaryClassification:
@@ -97,8 +97,8 @@ class ModelPipelineFactory:
     @property
     def weights_path(self) -> Path:
         if self.is_binaryClassification:
-            return Path(self._artifactspaths.binaryweights_path)
-        return Path(self._artifactspaths.multiweights_path)
+            return Path(self._artifactspaths.binaryweights)
+        return Path(self._artifactspaths.multiweights)
 
     @property
     def experiment_meta(self) -> tuple[str, str]:
