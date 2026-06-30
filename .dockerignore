@@ -1,0 +1,12 @@
+.git
+.dvc
+data/
+__pycache__/
+logs/
+reports/
+research/
+mlflow.db
+mlruns/
+
+# Completely block the training/evaluation components folder
+src/components/
