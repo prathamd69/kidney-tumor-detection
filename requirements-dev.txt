@@ -1,0 +1,12 @@
+﻿# Web Server & API Framework
+fastapi>=0.110.0
+uvicorn>=0.28.0
+python-multipart>=0.0.9
+
+# Data Processing & Configuration Utilities
+numpy>=1.23.5,<2.0.0
+pandas>=2.0.0
+python-box>=7.0.0
+pyYAML>=6.0.1
+
+tensorflow
