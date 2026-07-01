@@ -14,7 +14,7 @@ COPY src/ ./src/
 COPY config/ ./config/
 COPY templates/ ./templates/
 
-COPY models/ ./models/
+COPY litemodels/ ./litemodels/
 
 COPY app.py .
 COPY class_descriptions.json .
