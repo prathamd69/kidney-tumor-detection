@@ -5,8 +5,8 @@ stages:
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 400e574d6943e48da53480cb3bc76d3f
-      size: 473
+      md5: ac7cef9f9d47f2a27061d07d87b3faeb
+      size: 554
     - path: data/raw/images
       hash: md5
       md5: 9dc4cb1700ebd6d8c89682e682aff6a4.dir
@@ -116,12 +116,12 @@ stages:
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 400e574d6943e48da53480cb3bc76d3f
-      size: 473
+      md5: ac7cef9f9d47f2a27061d07d87b3faeb
+      size: 554
     - path: src/components/binaryclassification/binaryclass_training.py
       hash: md5
-      md5: 9a799475c06b371247d14da6231ccbb8
-      size: 2408
+      md5: ba227afbceb25276f24ab095525a9215
+      size: 2435
     params:
       params.yaml:
         basic_model_params.img_height: 224
@@ -134,21 +134,21 @@ stages:
         - accuracy
         binaryclass_model_params.optimizer: Adamax
     outs:
-    - path: models/binaryclass/binarymodel_weights.h5
+    - path: models/binarymodel_weights.h5
       hash: md5
-      md5: f7721d6cde1977f9df587ebb648abbc3
+      md5: b43a186459c4b9d2c438c10bb4c0a56c
       size: 16825616
   multiclass_training:
     cmd: python -m src.components.multiclassification.multiclass_training
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 400e574d6943e48da53480cb3bc76d3f
-      size: 473
+      md5: ac7cef9f9d47f2a27061d07d87b3faeb
+      size: 554
     - path: src/components/multiclassification/multiclass_training.py
       hash: md5
-      md5: 6edea5d2e9ec42df488818f969144be8
-      size: 2402
+      md5: 40b79b54fc76156436ffd4c858b91768
+      size: 2427
     params:
       params.yaml:
         basic_model_params.img_height: 224
@@ -161,36 +161,36 @@ stages:
         - accuracy
         multiclass_model_params.optimizer: Adamax
     outs:
-    - path: models/multiclass/multimodel_weights.h5
+    - path: models/multimodel_weights.h5
       hash: md5
-      md5: cb6bbb76bda77552a03b1ccb446fc3a4
+      md5: 691b87a9371c6a2f0311daab07e1a07c
       size: 16826576
   binaryclass_evaluation:
     cmd: python -m src.components.binaryclassification.binarymodel_evaluation
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 400e574d6943e48da53480cb3bc76d3f
-      size: 473
+      md5: ac7cef9f9d47f2a27061d07d87b3faeb
+      size: 554
     - path: src/components/binaryclassification/binarymodel_evaluation.py
       hash: md5
-      md5: 2ab81f68dfec033bb6d32882986c9d66
+      md5: c8a72c5398aef63da8ee63ce327f703e
       size: 3982
     params:
       params.yaml:
         binaryclass_model_params.experiment_name: binaryclass_CNNs
-        binaryclass_model_params.run_name: test_run1
+        binaryclass_model_params.run_name: EfficientNETB0_Evaluation_1
   multiclass_evaluation:
     cmd: python -m src.components.multiclassification.multimodel_evaluation
     deps:
     - path: src/components/multiclassification/multimodel_evaluation.py
       hash: md5
-      md5: 82c936e17e0905410bb9d144f5df150d
-      size: 3793
+      md5: 0cd35e9618a8cef23bee8253c25ac8c3
+      size: 3820
     params:
       params.yaml:
         multiclass_model_params.experiment_name: multiclass_CNNs
-        multiclass_model_params.run_name: test_run1
+        multiclass_model_params.run_name: EfficientNETB0_Evaluation_1
   binary_base_model_building:
     cmd: python -m src.components.binaryclassification.binarybase_model
     deps:
@@ -232,3 +232,19 @@ stages:
         - accuracy
         multiclass_model_params.num_classes: 4
         multiclass_model_params.optimizer: Adam
+  tflite_conversion:
+    cmd: python -m src.components.model_optimization
+    deps:
+    - path: src/components/model_optimization.py
+      hash: md5
+      md5: a8d0c387b932e9a520ecb11c800c7b5c
+      size: 2819
+    outs:
+    - path: litemodels/binarymodel.tflite
+      hash: md5
+      md5: 5b380743a12172d2bbbcc601ce18d9e6
+      size: 4631048
+    - path: litemodels/multimodel.tflite
+      hash: md5
+      md5: a6784ecd4bd9509682cd6313b8192255
+      size: 4633064

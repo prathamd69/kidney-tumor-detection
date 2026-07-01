@@ -5,8 +5,12 @@ data_paths:
   images_dir: data/raw/images
 
 artifacts_paths:
-  binaryweights: models/binaryclass/binarymodel_weights.h5
-  multiweights: models/multiclass/multimodel_weights.h5
+  binaryweights: models/binarymodel_weights.h5
+  multiweights: models/multimodel_weights.h5
+
+  litebinarymodel : litemodels/binarymodel.tflite
+  litemultimodel : litemodels/multimodel.tflite
+
   binarymetrics: reports/binaryclass/metrics.json
   multimetrics: reports/multiclass/metrics.json
 
