@@ -1,9 +1,9 @@
 import tensorflow as tf
 import mlflow
 from pathlib import Path
-from src.utils import configLogger, loadYaml, ModelPipelineFactory
-
-logger = configLogger("binarymodel_training", "binarymodel_training.log")
+from src.utils import configLogger, loadYaml
+from src.components import ModelPipelineFactory
+logger = configLogger("multimodel_training", "multimodel_training.log")
 
 def main():
     logger.info("Loading configuration files...")
@@ -11,13 +11,13 @@ def main():
     params = loadYaml(Path("params.yaml"))
     
     # centralized pipeline factory
-    pipeline = ModelPipelineFactory(config, params, is_binaryClassification=True)
+    pipeline = ModelPipelineFactory(config, params, is_binaryClassification=False)
 
     logger.info("Building model architecture and data streams...")
     train_ds, val_ds, model = pipeline.training_components()
     logger.info("Assets ready. Model compiled. Training dataset initialized.")
 
-    binaryweights = pipeline.weights_path
+    multiweights = pipeline.weights_path
     experiment_name, run_name = pipeline.experiment_meta
     modelparams = pipeline.getparams
 
@@ -47,12 +47,12 @@ def main():
         logger.info("Training loop finalized. Best Val Accuracy achieved: %.4f", final_val_acc)
         mlflow.log_metric("final_val_accuracy", final_val_acc)
 
-        logger.info("Exporting weights locally to: %s", binaryweights)
-        binaryweights.parent.mkdir(parents=True, exist_ok=True)
-        model.save_weights(str(binaryweights))
+        logger.info("Exporting weights locally to: %s", multiweights)
+        multiweights.parent.mkdir(parents=True, exist_ok=True)
+        model.save_weights(str(multiweights))
 
         logger.info("Uploading weights artifact to MLflow server...")
-        mlflow.log_artifact(str(binaryweights), artifact_path="binary_weights")
+        mlflow.log_artifact(str(multiweights), artifact_path="binary_weights")
         logger.info("Binary pipeline execution completed successfully.")
 
 if __name__ == "__main__":

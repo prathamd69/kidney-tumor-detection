@@ -9,4 +9,6 @@ mlflow.db
 mlruns/
 
 # Completely block the training/evaluation components folder
-src/components/
+src/binaryclassification
+src/multiclassification
+src/components

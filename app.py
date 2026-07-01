@@ -76,13 +76,11 @@ async def predict_binary(request: Request, file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Invalid file schema. Please upload a JPEG or PNG image.")
     
     try:
-        processor = request.state.img_processor
         binary_pred = request.state.binary_pred
         
         image_bytes = await file.read()
-        processed_tensor = processor.process(image_bytes)
-        
-        binary_result = binary_pred.predict(processed_tensor)
+
+        binary_result = binary_pred.predict(image_bytes)
         
         if binary_result["status"] == "error":
             raise HTTPException(status_code=500, detail=binary_result["message"])
@@ -105,13 +103,11 @@ async def predict_detailed(request: Request, file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Please upload a JPEG or PNG image.")
     
     try:
-        processor = request.state.img_processor
         multi_pred = request.state.multi_pred
         
         image_bytes = await file.read()
-        processed_tensor = processor.process(image_bytes)
         
-        multi_result = multi_pred.predict(processed_tensor)
+        multi_result = multi_pred.predict(image_bytes)
         pred_class = multi_result["prediction"]
 
         descriptions = request.state.class_descripts

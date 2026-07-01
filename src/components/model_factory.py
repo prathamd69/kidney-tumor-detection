@@ -3,10 +3,10 @@ from box import ConfigBox
 import tensorflow as tf
 from typing import Tuple
 import numpy as np
-from src.utils import (build_base_model, 
+from src.components import (build_base_model, 
                        create_training_dataset, 
-                       create_testing_dataset, 
-                       loadFile,
+                       create_testing_dataset)
+from src.utils import (loadFile,
                        configLogger)
 
 logger = configLogger('ModelFactory', 'ModelFactory.log')

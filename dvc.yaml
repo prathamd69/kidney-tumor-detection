@@ -30,7 +30,7 @@ stages:
       - binaryclass_model_params.batch_size
       - binaryclass_model_params.epochs
     outs:
-      - models/binaryclass/binarymodel_weights.h5
+      - models/binarymodel_weights.h5
 
   binaryclass_evaluation:
     cmd: python -m src.components.binaryclassification.binarymodel_evaluation
@@ -56,7 +56,7 @@ stages:
       - multiclass_model_params.batch_size
       - multiclass_model_params.epochs
     outs:
-      - models/multiclass/multimodel_weights.h5
+      - models/multimodel_weights.h5
 
   multiclass_evaluation:
       cmd: python -m src.components.multiclassification.multimodel_evaluation
@@ -65,3 +65,11 @@ stages:
       params:
         - multiclass_model_params.experiment_name
         - multiclass_model_params.run_name
+
+  tflite_conversion:
+      cmd: python -m src.components.model_optimization
+      deps:
+        - src/components/model_optimization.py
+      outs:
+        - litemodels/binarymodel.tflite
+        - litemodels/multimodel.tflite
