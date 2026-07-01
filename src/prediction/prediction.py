@@ -78,4 +78,62 @@ class BinaryPredictor:
             logger.exception("Binary Prediction layer failed execution: %s", e)
             return {"status": "error", "message": str(e)}
         
+class MultiPredictor:
+    def __init__(self) -> None:
+        try:
+            self.config = loadYaml(Path("config/config.yaml"))
+            self.modelpath = self.config.artifacts_paths.litemultimodel
 
+            self.interpreter = tflite.Interpreter(model_path=str(self.modelpath))
+            self.interpreter.allocate_tensors()
+            
+            self.input_details = self.interpreter.get_input_details()
+            self.output_details = self.interpreter.get_output_details()
+            
+            self.input_shape = self.input_details[0]['shape'] 
+            self.img_height = self.input_shape[1]
+            self.img_width = self.input_shape[2]
+            
+            self.relation_map = {0: "Cyst", 1: "Normal", 2: "Stone", 3: "Tumor"}
+
+            logger.info("MultiPredictor initialized and TFLite tensors allocated successfully.")
+            
+        except Exception as e:
+            logger.error("Failed to initialize MultiPredictor: %s", e)
+            raise
+
+    def predict(self, imagebytes: bytes) -> dict:
+        try:
+            
+            image_array = ImageProcessor.process_image(imagebytes, self.img_height, self.img_width)
+
+            self.interpreter.set_tensor(self.input_details[0]['index'], image_array)
+            self.interpreter.invoke()
+            predictions = self.interpreter.get_tensor(self.output_details[0]['index'])
+
+            prediction_probabs = predictions[0]
+
+            prediction_idx = int(np.argmax(prediction_probabs))
+            
+            # Use .get() for safety in case the model spits out an unexpected index length
+            prediction_class = self.relation_map.get(prediction_idx, f"Unknown Class {prediction_idx}")
+            confidence = float(prediction_probabs[prediction_idx])
+
+            raw_probs_dict = {
+                self.relation_map.get(idx, f"Class_{idx}"): round(float(prob), 4) 
+                for idx, prob in enumerate(prediction_probabs)
+            }
+
+            logger.info("Inference successful (Multi) - Predicted: %s : %s", 
+                        prediction_class, raw_probs_dict)
+            
+            return {
+                "status": "success",
+                "prediction": prediction_class,
+                "confidence": round(confidence, 4),
+                "raw_probability": raw_probs_dict
+            }
+        
+        except Exception as e:
+            logger.exception("Multi Prediction layer failed execution: %s", e)
+            return {"status": "error", "message": str(e)}
