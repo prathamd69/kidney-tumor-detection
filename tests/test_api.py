@@ -35,3 +35,23 @@ def test_binary_prediction():
     assert "binary_screening" in json_data
     assert json_data["binary_screening"]["status"] == "success"
     assert "confidence" in json_data["binary_screening"]
+
+def test_detailed_prediction():
+    """Sends a fake image to the detailed multi-class endpoint and verifies the response format."""
+    dummy_image = generate_dummy_image()
+    response = client.post(
+        "/predict/detailed", 
+        files={"file": ("test.jpg", dummy_image, "image/jpeg")}
+    )
+
+    assert response.status_code == 200
+
+    json_data = response.json()
+    assert "detailed_diagnosis" in json_data
+ 
+    details = json_data["detailed_diagnosis"]
+    assert details["status"] == "success"
+    assert "prediction" in details
+    assert "confidence" in details
+    assert "raw_probability" in details
+    assert "medical_description" in details
