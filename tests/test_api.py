@@ -4,7 +4,10 @@ from PIL import Image
 from fastapi.testclient import TestClient
 from app import app
 
-client = TestClient(app)
+@pytest.fixture
+def client():
+    with TestClient(app) as c:
+        yield c
 
 def generate_dummy_image():
     """Generates a tiny 224x224 red square in memory to trick the API into thinking it's a real CT scan."""
@@ -15,13 +18,13 @@ def generate_dummy_image():
     file.seek(0)
     return file
 
-def test_home_endpoint():
+def test_home_endpoint(client):
     """Checks if the frontend HTML page loads properly."""
     response = client.get("/")
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
 
-def test_binary_prediction():
+def test_binary_prediction(client):
     """Sends a fake image to the binary endpoint and verifies the response format."""
     dummy_image = generate_dummy_image()
     response = client.post(
@@ -36,7 +39,7 @@ def test_binary_prediction():
     assert json_data["binary_screening"]["status"] == "success"
     assert "confidence" in json_data["binary_screening"]
 
-def test_detailed_prediction():
+def test_detailed_prediction(client):
     """Sends a fake image to the detailed multi-class endpoint and verifies the response format."""
     dummy_image = generate_dummy_image()
     response = client.post(
