@@ -10,3 +10,4 @@ python-box>=7.0.0
 pyYAML>=6.0.1
 
 tensorflow
+pytest==9.1.1
