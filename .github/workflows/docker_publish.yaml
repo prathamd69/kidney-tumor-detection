@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - dev
     paths-ignore:
       - 'README.md'
       - '.dvc/**'
@@ -40,6 +41,8 @@ on:
       - 'src/binaryclassification/**'
       - 'src/multiclassification/**'
       - 'src/components/**'
+  
+  
 
 jobs:
   # --- CONTINUOUS INTEGRATION (CI) ---
@@ -62,14 +65,17 @@ jobs:
           pip install pytest httpx
           
       - name: Run PyTest
-        run: pytest tests/
+        run: python -m pytest tests/
 
   # --- CONTINUOUS DELIVERY (CD) ---
   # This ONLY runs on Pushes/Merges to main. It ignores Pull Requests.
   build-and-push:
     name: Build & Push Docker Image
     needs: test-api  
-    if: github.event_name == 'push'
+    
+    # CRITICAL: Only push to Docker Hub if the push was specifically to the main branch
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
